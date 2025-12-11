@@ -1,38 +1,44 @@
-.App {
-  text-align: center;
+.app-bg {
+  background: linear-gradient(135deg, #1a102b 0%, #0b0a1f 100%);
+}
+/* index.css (append) */
+:root{
+  --card-bg: rgba(255,255,255,0.03);
+  --card-bg-2: rgba(255,255,255,0.02);
+  --muted: #000000;
+  --accent: #8b5cf6;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* exact gradient you provided */
+.app-bg {
+  background: linear-gradient(135deg, #1a102b 0%, #0b0a1f 100%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* glass card */
+.card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.03);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* subtle card header */
+.card-header {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
-.App-link {
-  color: #61dafb;
+/* small badge */
+.badge {
+  background: rgba(255,255,255,0.06);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* keep body full height so gradient fills */
+html, body, #root {
+  height: 100%;
 }

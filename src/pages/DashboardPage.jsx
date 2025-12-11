@@ -1,6 +1,6 @@
 // src/pages/DashboardPage.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -68,6 +68,41 @@ export default function DashboardPage() {
           </p>
           <div className="text-3xl font-bold mt-3 text-green-400">+$340.12</div>
           <p className="text-gray-300 mt-2">Across 7 assets</p>
+        </div>
+      </div>
+
+      {/* ⭐ NEW QUICK ACTION BUTTONS SECTION ⭐ */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-10 backdrop-blur-xl">
+
+        <h2 className="text-xl font-semibold text-gray-200 mb-4">
+          Quick Actions 🚀
+        </h2>
+
+        <div className="flex gap-4 flex-wrap">
+
+          {/* Add API Key */}
+          <Link
+            to="/add-key"
+            className="
+              px-6 py-3 rounded-xl font-semibold
+              bg-gradient-to-r from-purple-600 to-pink-500
+              text-white shadow-lg hover:scale-105 transition
+            "
+          >
+            Add API Key
+          </Link>
+
+          {/* View API Keys */}
+          <Link
+            to="/keys"
+            className="
+              px-6 py-3 rounded-xl font-semibold
+              bg-gradient-to-r from-blue-500 to-purple-500
+              text-white shadow-lg hover:scale-105 transition
+            "
+          >
+            View API Keys
+          </Link>
         </div>
       </div>
 

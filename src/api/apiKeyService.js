@@ -40,7 +40,6 @@ export const saveApiKey = async (payload) => {
   return await res.json();
 };
 
-
 // -----------------------------
 // 🔹 Get user's saved API keys
 // -----------------------------
@@ -69,7 +68,6 @@ export const deleteKey = async (keyId) => {
 // -----------------------------
 // 🔹 Test Binance Connection
 // -----------------------------
-
 export const testBinanceConnection = async (keyId) => {
   const token = localStorage.getItem("token");
 
@@ -84,5 +82,4 @@ export const testBinanceConnection = async (keyId) => {
 
   return res.json(); // response is boolean
 };
-
 

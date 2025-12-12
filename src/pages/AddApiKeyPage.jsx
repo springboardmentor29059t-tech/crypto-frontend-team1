@@ -1,22 +1,25 @@
-import { getExchanges, saveApiKey } from "../api/apiKeyService";
 import { useEffect, useState } from "react";
+import { getExchanges, saveApiKey } from "../api/apiKeyService";
 import toast from "react-hot-toast";
 
 export default function AddApiKeyPage() {
-  const [exchanges, setExchanges] = useState([]);
   const [form, setForm] = useState({
     exchangeId: "",
     apiKey: "",
     apiSecret: "",
-    label: ""
+    label: "",
   });
 
+  const [exchanges, setExchanges] = useState([]);
+
+  // -------------------------------------
+  // 🔹 Load exchanges from backend
+  // -------------------------------------
   useEffect(() => {
     getExchanges()
-      .then(setExchanges)
+      .then((data) => setExchanges(data))
       .catch(() => toast.error("Failed to load exchanges"));
   }, []);
-
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });

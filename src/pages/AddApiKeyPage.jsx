@@ -1,14 +1,22 @@
-import { useState } from "react";
-import { saveApiKey } from "../api/apiKeyService";
+import { getExchanges, saveApiKey } from "../api/apiKeyService";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function AddApiKeyPage() {
+  const [exchanges, setExchanges] = useState([]);
   const [form, setForm] = useState({
     exchangeId: "",
     apiKey: "",
     apiSecret: "",
-    label: "",
+    label: ""
   });
+
+  useEffect(() => {
+    getExchanges()
+      .then(setExchanges)
+      .catch(() => toast.error("Failed to load exchanges"));
+  }, []);
+
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,23 +24,8 @@ export default function AddApiKeyPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const userId = localStorage.getItem("userId"); // ⭐ IMPORTANT
-
-    if (!userId) {
-      toast.error("User not logged in");
-      return;
-    }
-
-    const payload = {
-      userId: Number(userId),
-      exchangeId: Number(form.exchangeId),
-      apiKey: form.apiKey,
-      apiSecret: form.apiSecret,
-      label: form.label || "My API Key",
-    };
-
     try {
-      await saveApiKey(payload);
+      await saveApiKey(form);
       toast.success("API Key saved successfully!");
 
       setForm({
@@ -42,92 +35,97 @@ export default function AddApiKeyPage() {
         label: "",
       });
     } catch (err) {
-      console.error(err);
-      toast.error("Error saving API key");
+      toast.error("Failed to save API key");
     }
   };
 
   return (
-    <div className="px-6 py-10 flex justify-center">
-      <div className="w-full max-w-xl p-8 bg-white shadow-lg rounded-2xl border border-gray-200">
-
-        <h1 className="text-3xl font-bold text-purple-700 text-center mb-8">
-          Add API Key
+    <div className="flex justify-center px-6 py-12">
+      <div className="w-full max-w-xl bg-[#12002b] shadow-lg rounded-2xl p-10 text-white border border-white/10">
+        
+        <h1 className="text-3xl font-bold text-purple-400 mb-8 flex items-center gap-2">
+          Add API Key 🔐
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Exchange */}
+          {/* Exchange Dropdown */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
-              Exchange
-            </label>
+            <label className="block text-sm mb-2">Exchange</label>
             <select
-              name="exchangeId"
-              value={form.exchangeId}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Select Exchange</option>
-              <option value="1">Binance</option>
-            </select>
+  name="exchangeId"
+  value={form.exchangeId}
+  onChange={handleChange}
+  required
+  className="w-full p-3 rounded-xl bg-[#2A2139] text-white border border-purple-500 
+             focus:ring-2 focus:ring-purple-400 focus:outline-none"
+>
+  <option value="" className="text-gray-400 bg-[#2A2139]">
+    Select Exchange
+  </option>
+
+  {exchanges.map((ex) => (
+    <option
+      key={ex.id}
+      value={ex.id}
+      className="bg-[#2A2139] text-white hover:bg-purple-600"
+    >
+      {ex.name}
+    </option>
+  ))}
+</select>
+
           </div>
 
           {/* API Key */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
-              API Key
-            </label>
+            <label className="block text-sm mb-2">API Key</label>
             <input
               type="text"
               name="apiKey"
               value={form.apiKey}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-purple-500"
               placeholder="Enter your API Key"
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
             />
           </div>
 
           {/* API Secret */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
-              API Secret
-            </label>
+            <label className="block text-sm mb-2">API Secret</label>
             <input
               type="password"
               name="apiSecret"
               value={form.apiSecret}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-purple-500"
               placeholder="Enter your API Secret"
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
             />
           </div>
 
           {/* Label */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
-              Label (optional)
-            </label>
+            <label className="block text-sm mb-2">Label (optional)</label>
             <input
               type="text"
               name="label"
               value={form.label}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-purple-500"
               placeholder="Ex: Main Trading Key"
+              className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-3 rounded-xl text-lg font-semibold
-            hover:bg-purple-700 transition-all"
+            className="w-full py-3 rounded-xl text-lg font-semibold 
+            bg-purple-600 hover:bg-purple-700 transition-all shadow-lg"
           >
             Save API Key
           </button>
+
         </form>
       </div>
     </div>

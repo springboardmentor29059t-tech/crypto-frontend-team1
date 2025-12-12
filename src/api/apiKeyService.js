@@ -1,19 +1,26 @@
-// Get all API keys for logged-in user
-export const getUserKeys = async () => {
-  const token = localStorage.getItem("token");
+// src/api/apiKeyService.js
 
-  const res = await fetch("http://localhost:8080/api/exchange/keys/user/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+const API_BASE = "http://localhost:8080";
 
-  if (!res.ok) throw new Error("Failed to fetch API keys");
+// Get token
+const authHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: "Bearer " + localStorage.getItem("token"),
+});
 
+// -----------------------------
+// 🔹 Fetch all exchanges
+// -----------------------------
+export const getExchanges = async () => {
+  const res = await fetch("http://localhost:8080/api/exchange/list");
+  if (!res.ok) throw new Error("Failed to load exchanges");
   return res.json();
 };
 
-// Save new API key
+
+// -----------------------------
+// 🔹 Save user API key
+// -----------------------------
 export const saveApiKey = async (payload) => {
   const token = localStorage.getItem("token");
 
@@ -21,49 +28,61 @@ export const saveApiKey = async (payload) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "Authorization": "Bearer " + token
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
 
-  if (!res.ok) throw new Error("Failed to save API key");
+  if (!res.ok) {
+    throw new Error("Failed to save API key");
+  }
 
+  return await res.json();
+};
+
+
+// -----------------------------
+// 🔹 Get user's saved API keys
+// -----------------------------
+export const getUserKeys = async () => {
+  const res = await fetch(`${API_BASE}/api/exchange/keys`, {
+    headers: authHeaders(),
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch keys");
   return res.json();
 };
 
-// Delete API key
+// -----------------------------
+// 🔹 Delete a key
+// -----------------------------
 export const deleteKey = async (keyId) => {
-  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/api/exchange/keys/${keyId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
 
-  const res = await fetch(
-    `http://localhost:8080/api/exchange/keys/${keyId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  if (!res.ok) throw new Error("Failed to delete key");
-
-  return true;
+  if (!res.ok) throw new Error("Failed to delete API key");
+  return res.text();
 };
 
-// Test Binance Connection
+// -----------------------------
+// 🔹 Test Binance Connection
+// -----------------------------
+
 export const testBinanceConnection = async (keyId) => {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `http://localhost:8080/api/binance/test/${keyId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await fetch(`http://localhost:8080/api/binance/test/${keyId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  if (!res.ok) throw new Error("Binance connection failed");
+  if (!res.ok) throw new Error("Failed to test Binance key");
 
-  return res.json(); // should be { success: true/false }
+  return res.json(); // response is boolean
 };
+
+

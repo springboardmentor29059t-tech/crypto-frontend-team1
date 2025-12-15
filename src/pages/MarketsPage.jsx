@@ -29,7 +29,7 @@ export default function MarketsPage() {
         price: coin.current_price,
       });
     }
-    setCoins([...coins]); // re-render UI
+    setCoins([...coins]);
   };
 
   return (
@@ -61,7 +61,11 @@ export default function MarketsPage() {
                     {coin.name}
                   </td>
 
-                  <td className="p-3">${coin.current_price}</td>
+                  <td className="p-3">
+                    {coin.current_price != null
+                      ? `$${coin.current_price.toFixed(2)}`
+                      : "—"}
+                  </td>
 
                   <td
                     className={`p-3 ${
@@ -70,7 +74,9 @@ export default function MarketsPage() {
                         : "text-red-400"
                     }`}
                   >
-                    {coin.price_change_percentage_24h.toFixed(2)}%
+                    {coin.price_change_percentage_24h != null
+                      ? `${coin.price_change_percentage_24h.toFixed(2)}%`
+                      : "—"}
                   </td>
 
                   <td className="p-3">

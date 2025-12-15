@@ -1,42 +1,163 @@
-// src/pages/Analytics.jsx
-import React from "react";
+import { useEffect, useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+import { fetchPortfolioHoldings } from "../api/portfolioApi";
+import { fetchPrices } from "../api/priceApi";
 import Card from "../components/Card";
-import ChartPlaceholder from "../components/ChartPlaceholder";
 
-export default function Analytics() {
+const COLORS = ["#a855f7", "#22c55e", "#f97316", "#38bdf8"];
+
+export default function AnalyticsPage() {
+  const [holdings, setHoldings] = useState([]);
+  const [prices, setPrices] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPortfolioHoldings()
+      .then(async (data) => {
+        setHoldings(data);
+        const symbols = data.map((h) => h.asset);
+        const priceData = await fetchPrices(symbols);
+        setPrices(priceData);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // prepare chart data
+  const chartData = holdings.map((h) => {
+    const id =
+      h.asset === "BTC"
+        ? "bitcoin"
+        : h.asset === "ETH"
+        ? "ethereum"
+        : h.asset === "SOL"
+        ? "solana"
+        : null;
+
+    const price = id ? prices?.[id]?.usd || 0 : 0;
+    const value = h.quantity * price;
+
+    return {
+      name: h.asset,
+      value,
+    };
+  });
+
+  const totalValue = chartData.reduce((s, d) => s + d.value, 0);
+
+  const topAsset =
+    chartData.length > 0
+      ? chartData.reduce((a, b) => (b.value > a.value ? b : a))
+      : null;
+
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-[#0b021f] via-[#180b3a] to-[#020617] text-white">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Analytics</h1>
-        <div className="text-sm text-gray-400">Last 7 days</div>
-      </div>
+    <>
+      <h1 className="text-3xl font-bold mb-6">Analytics</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Card><ChartPlaceholder title="Portfolio trend" height={120} /></Card>
-        <Card><ChartPlaceholder title="Profit / Loss" height={120} /></Card>
+      {/* Overview Cards */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
         <Card>
-          <div className="text-sm text-gray-400 mb-2">Quick Insights</div>
-          <div className="space-y-2">
-            <div>• Top asset: ETH (+8.9% today)</div>
-            <div>• Average daily change: +1.2%</div>
-            <div>• Diversification: 7 assets</div>
-          </div>
+          <p className="text-gray-400 text-sm">Total Assets</p>
+          <p className="text-2xl font-bold">{holdings.length}</p>
+        </Card>
+
+        <Card>
+          <p className="text-gray-400 text-sm">Portfolio Value</p>
+          <p className="text-2xl font-bold">
+            ${totalValue.toLocaleString()}
+          </p>
+        </Card>
+
+        <Card>
+          <p className="text-gray-400 text-sm">Top Asset</p>
+          <p className="text-2xl font-bold">
+            {topAsset ? topAsset.name : "--"}
+          </p>
         </Card>
       </div>
 
-      <Card>
-        <h2 className="text-xl font-semibold mb-4">Detailed metrics</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="text-sm text-gray-400">Allocation</div>
-            <div className="mt-3">BTC 38% • ETH 28% • Others 34%</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-400">Risk score</div>
-            <div className="mt-3 font-semibold">Moderate</div>
-          </div>
-        </div>
-      </Card>
-    </div>
+      {/* Chart + Breakdown */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Pie Chart */}
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">
+            Asset Distribution
+          </h2>
+
+          {loading ? (
+            <p className="text-gray-400">Loading chart...</p>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={90}
+                  >
+                    {chartData.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </Card>
+
+        {/* Breakdown Table */}
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">
+            Asset Breakdown
+          </h2>
+
+          <table className="w-full text-sm">
+            <thead className="text-gray-400 border-b border-white/10">
+              <tr>
+                <th className="py-2 text-left">Asset</th>
+                <th className="text-right">Value</th>
+                <th className="text-right">Allocation</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {chartData.map((d) => {
+                const percent =
+                  totalValue === 0
+                    ? 0
+                    : (d.value / totalValue) * 100;
+
+                return (
+                  <tr
+                    key={d.name}
+                    className="border-b border-white/5"
+                  >
+                    <td className="py-2 font-medium">{d.name}</td>
+                    <td className="text-right">
+                      ${d.value.toLocaleString()}
+                    </td>
+                    <td className="text-right">
+                      {percent.toFixed(1)}%
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+    </>
   );
 }

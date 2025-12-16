@@ -6,6 +6,18 @@ import {
   deleteTransactionApi,
 } from "../api/transactionsApi";
 
+/* 🔹 Supported coins list */
+const COINS = [
+  { symbol: "BTC", name: "Bitcoin" },
+  { symbol: "ETH", name: "Ethereum" },
+  { symbol: "SOL", name: "Solana" },
+  { symbol: "BNB", name: "Binance Coin" },
+  { symbol: "ADA", name: "Cardano" },
+  { symbol: "XRP", name: "Ripple" },
+  { symbol: "DOT", name: "Polkadot" },
+  { symbol: "AVAX", name: "Avalanche" },
+];
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,19 +105,25 @@ export default function TransactionsPage() {
           <select
             value={form.asset}
             onChange={(e) => setForm({ ...form, asset: e.target.value })}
-            className="bg-white/5 text-white rounded px-3 py-2 
+            className="bg-white/5 text-white rounded px-3 py-2
                        focus:outline-none focus:ring-2 focus:ring-purple-500/40"
           >
-            <option className="bg-[#0b021f] text-white">BTC</option>
-            <option className="bg-[#0b021f] text-white">ETH</option>
-            <option className="bg-[#0b021f] text-white">SOL</option>
+            {COINS.map((coin) => (
+              <option
+                key={coin.symbol}
+                value={coin.symbol}
+                className="bg-[#0b021f] text-white"
+              >
+                {coin.symbol} – {coin.name}
+              </option>
+            ))}
           </select>
 
           {/* Type */}
           <select
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="bg-white/5 text-white rounded px-3 py-2 
+            className="bg-white/5 text-white rounded px-3 py-2
                        focus:outline-none focus:ring-2 focus:ring-purple-500/40"
           >
             <option value="BUY" className="bg-[#0b021f] text-white">
@@ -122,8 +140,8 @@ export default function TransactionsPage() {
             placeholder="Quantity"
             value={form.quantity}
             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-            className="bg-white/5 rounded px-3 py-2 text-white 
-                       placeholder-gray-400 focus:outline-none 
+            className="bg-white/5 rounded px-3 py-2 text-white
+                       placeholder-gray-400 focus:outline-none
                        focus:ring-2 focus:ring-purple-500/40"
           />
 
@@ -133,15 +151,15 @@ export default function TransactionsPage() {
             placeholder="Price"
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
-            className="bg-white/5 rounded px-3 py-2 text-white 
-                       placeholder-gray-400 focus:outline-none 
+            className="bg-white/5 rounded px-3 py-2 text-white
+                       placeholder-gray-400 focus:outline-none
                        focus:ring-2 focus:ring-purple-500/40"
           />
 
           {/* Add Button */}
           <button
             onClick={addTransaction}
-            className="bg-purple-600 hover:bg-purple-700 
+            className="bg-purple-600 hover:bg-purple-700
                        rounded px-4 py-2 font-semibold transition"
           >
             Add

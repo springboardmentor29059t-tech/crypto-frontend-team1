@@ -17,11 +17,13 @@ export default function AnalyticsPage() {
   const [holdings, setHoldings] = useState([]);
   const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showPnL, setShowPnL] = useState(false);
 
   useEffect(() => {
     fetchPortfolioHoldings()
       .then(async (data) => {
         setHoldings(data);
+
         const symbols = data.map((h) => h.asset);
         const priceData = await fetchPrices(symbols);
         setPrices(priceData);
@@ -29,23 +31,30 @@ export default function AnalyticsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // prepare chart data
-  const chartData = holdings.map((h) => {
-    const id =
-      h.asset === "BTC"
-        ? "bitcoin"
-        : h.asset === "ETH"
-        ? "ethereum"
-        : h.asset === "SOL"
-        ? "solana"
-        : null;
+  // 🔹 Map asset → coingecko id
+  const getPriceId = (asset) => {
+    switch (asset) {
+      case "BTC":
+        return "bitcoin";
+      case "ETH":
+        return "ethereum";
+      case "SOL":
+        return "solana";
+      case "ADA":
+        return "cardano";
+      default:
+        return null;
+    }
+  };
 
+  // 🔹 Chart data
+  const chartData = holdings.map((h) => {
+    const id = getPriceId(h.asset);
     const price = id ? prices?.[id]?.usd || 0 : 0;
-    const value = h.quantity * price;
 
     return {
       name: h.asset,
-      value,
+      value: Number(h.quantity) * price,
     };
   });
 
@@ -56,11 +65,27 @@ export default function AnalyticsPage() {
       ? chartData.reduce((a, b) => (b.value > a.value ? b : a))
       : null;
 
+  // 🔹 Profit & Loss calculations
+  const totalInvested = holdings.reduce(
+    (sum, h) => sum + Number(h.quantity) * Number(h.avgBuyPrice || 0),
+    0
+  );
+
+  const currentValue = holdings.reduce((sum, h) => {
+    const id = getPriceId(h.asset);
+    const price = id ? prices?.[id]?.usd || 0 : 0;
+    return sum + Number(h.quantity) * price;
+  }, 0);
+
+  const netPnl = currentValue - totalInvested;
+  const pnlPct =
+    totalInvested === 0 ? 0 : (netPnl / totalInvested) * 100;
+
   return (
     <>
       <h1 className="text-3xl font-bold mb-6">Analytics</h1>
 
-      {/* Overview Cards */}
+      {/* 🔹 Overview Cards */}
       <div className="grid grid-cols-3 gap-6 mb-6">
         <Card>
           <p className="text-gray-400 text-sm">Total Assets</p>
@@ -82,7 +107,51 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* Chart + Breakdown */}
+      {/* 🔹 Profit & Loss Button */}
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={() => setShowPnL(!showPnL)}
+          className="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition font-semibold"
+        >
+          {showPnL ? "Hide Profit & Loss" : "Check Profit & Loss"}
+        </button>
+      </div>
+
+      {/* 🔹 Profit & Loss Section */}
+      {showPnL && (
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <Card>
+            <p className="text-gray-400 text-sm">Total Invested</p>
+            <p className="text-2xl font-bold">
+              ${totalInvested.toFixed(2)}
+            </p>
+          </Card>
+
+          <Card>
+            <p className="text-gray-400 text-sm">Current Value</p>
+            <p className="text-2xl font-bold">
+              ${currentValue.toFixed(2)}
+            </p>
+          </Card>
+
+          <Card>
+            <p className="text-gray-400 text-sm">Net Profit / Loss</p>
+            <p
+              className={
+                "text-2xl font-bold " +
+                (netPnl >= 0
+                  ? "text-emerald-400"
+                  : "text-red-400")
+              }
+            >
+              {netPnl >= 0 ? "+" : ""}
+              ${netPnl.toFixed(2)} ({pnlPct.toFixed(2)}%)
+            </p>
+          </Card>
+        </div>
+      )}
+
+      {/* 🔹 Chart + Breakdown */}
       <div className="grid grid-cols-2 gap-6">
         {/* Pie Chart */}
         <Card>

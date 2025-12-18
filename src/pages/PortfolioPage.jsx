@@ -3,6 +3,14 @@ import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
 import HoldingsTable from "../components/portfolio/HoldingsTable";
 
+/* 🔹 INR formatter */
+const formatINR = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value);
+
 export default function PortfolioPage() {
   const [holdings, setHoldings] = useState([]);
   const [prices, setPrices] = useState({});
@@ -32,8 +40,8 @@ export default function PortfolioPage() {
         ? "polygon"
         : null;
 
-    const price = id ? prices?.[id]?.usd || 0 : 0;
-    return sum + h.quantity * price;
+    const price = id ? Number(prices?.[id]?.inr || 0) : 0;
+    return sum + Number(h.quantity || 0) * price;
   }, 0);
 
   return (
@@ -49,7 +57,7 @@ export default function PortfolioPage() {
         <div className="bg-white/5 p-6 rounded-xl">
           <p className="text-gray-400">Current Value</p>
           <p className="text-2xl font-bold">
-            ${totalValue.toFixed(2)}
+            {formatINR(totalValue)}
           </p>
         </div>
 

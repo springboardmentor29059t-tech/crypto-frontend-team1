@@ -50,7 +50,7 @@ export default function AnalyticsPage() {
   // 🔹 Chart data
   const chartData = holdings.map((h) => {
     const id = getPriceId(h.asset);
-    const price = id ? prices?.[id]?.usd || 0 : 0;
+    const price = id ? prices?.[id]?.inr || 0 : 0;
 
     return {
       name: h.asset,
@@ -73,7 +73,7 @@ export default function AnalyticsPage() {
 
   const currentValue = holdings.reduce((sum, h) => {
     const id = getPriceId(h.asset);
-    const price = id ? prices?.[id]?.usd || 0 : 0;
+    const price = id ? prices?.[id]?.inr || 0 : 0;
     return sum + Number(h.quantity) * price;
   }, 0);
 
@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
         <Card>
           <p className="text-gray-400 text-sm">Portfolio Value</p>
           <p className="text-2xl font-bold">
-            ${totalValue.toLocaleString()}
+            ₹{totalValue.toLocaleString()}
           </p>
         </Card>
 
@@ -123,14 +123,14 @@ export default function AnalyticsPage() {
           <Card>
             <p className="text-gray-400 text-sm">Total Invested</p>
             <p className="text-2xl font-bold">
-              ${totalInvested.toFixed(2)}
+              ₹{totalInvested.toFixed(2)}
             </p>
           </Card>
 
           <Card>
             <p className="text-gray-400 text-sm">Current Value</p>
             <p className="text-2xl font-bold">
-              ${currentValue.toFixed(2)}
+              ₹{currentValue.toFixed(2)}
             </p>
           </Card>
 
@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
               }
             >
               {netPnl >= 0 ? "+" : ""}
-              ${netPnl.toFixed(2)} ({pnlPct.toFixed(2)}%)
+              ₹{netPnl.toFixed(2)} ({pnlPct.toFixed(2)}%)
             </p>
           </Card>
         </div>
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
                   >
                     <td className="py-2 font-medium">{d.name}</td>
                     <td className="text-right">
-                      ${d.value.toLocaleString()}
+                      ₹{d.value.toLocaleString()}
                     </td>
                     <td className="text-right">
                       {percent.toFixed(1)}%

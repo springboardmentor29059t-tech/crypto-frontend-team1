@@ -55,10 +55,10 @@ export default function TransactionsTable({ transactions, loading }) {
 
                   <td className="py-2">{tx.quantity}</td>
 
-                  <td className="py-2">${tx.price}</td>
+                  <td className="py-2">₹{tx.price}</td>
 
                   <td className="py-2 text-right">
-                    ${total.toLocaleString(undefined, {
+                    ₹{total.toLocaleString(undefined, {
                       maximumFractionDigits: 2,
                     })}
                   </td>

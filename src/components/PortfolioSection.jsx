@@ -18,7 +18,7 @@ export default function PortfolioSection({ holdings = [], loading }) {
           </p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-200">
-          Total ≈ ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          Total ≈ ₹{totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
       </div>
 
@@ -62,7 +62,7 @@ export default function PortfolioSection({ holdings = [], loading }) {
                   <td className="py-2">{coin.quantity}</td>
 
                   <td className="py-2">
-                    ${coin.currentPrice.toLocaleString()}
+                    ₹{coin.currentPrice.toLocaleString()}
                   </td>
 
                   <td className="py-2">
@@ -78,7 +78,7 @@ export default function PortfolioSection({ holdings = [], loading }) {
                   </td>
 
                   <td className="py-2 text-right">
-                    ${value.toLocaleString(undefined, {
+                    ₹{value.toLocaleString(undefined, {
                       maximumFractionDigits: 2,
                     })}
                   </td>

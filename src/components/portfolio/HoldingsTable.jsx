@@ -33,7 +33,7 @@ export default function HoldingsTable({ holdings = [], prices = {} }) {
               const quantity = Number(h.quantity || 0);
               const avgBuy = Number(h.avgBuyPrice || 0);
               const currentPrice = Number(
-                priceId ? prices?.[priceId]?.usd : 0
+                priceId ? prices?.[priceId]?.inr : 0
               );
 
               // 🔹 Calculations
@@ -51,9 +51,9 @@ export default function HoldingsTable({ holdings = [], prices = {} }) {
 
                   <td>{quantity}</td>
 
-                  <td>${avgBuy.toFixed(2)}</td>
+                  <td>₹{avgBuy.toFixed(2)}</td>
 
-                  <td>${currentPrice.toFixed(2)}</td>
+                  <td>₹{currentPrice.toFixed(2)}</td>
 
                   <td
                     className={

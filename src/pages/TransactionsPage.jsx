@@ -22,7 +22,6 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // form state
   const [form, setForm] = useState({
     asset: "BTC",
     type: "BUY",
@@ -31,7 +30,6 @@ export default function TransactionsPage() {
     date: new Date().toISOString().slice(0, 10),
   });
 
-  // 🔹 Load transactions from backend
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -47,7 +45,6 @@ export default function TransactionsPage() {
     }
   };
 
-  // 🔹 Add transaction
   const addTransaction = async () => {
     if (!form.quantity || !form.price) {
       alert("Quantity and Price must be greater than 0");
@@ -63,7 +60,6 @@ export default function TransactionsPage() {
 
       setTransactions((prev) => [saved, ...prev]);
 
-      // reset form
       setForm({
         asset: "BTC",
         type: "BUY",
@@ -76,7 +72,6 @@ export default function TransactionsPage() {
     }
   };
 
-  // 🔹 Delete transaction
   const deleteTransaction = async (id) => {
     try {
       await deleteTransactionApi(id);
@@ -89,99 +84,101 @@ export default function TransactionsPage() {
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Transactions</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Buy & sell history synced from backend
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Transactions</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Buy & sell history synced from backend
+        </p>
       </div>
 
-      {/* Add Transaction Form */}
-      <Card className="mb-6">
-        <div className="grid grid-cols-5 gap-4">
-          {/* Asset */}
+      {/* Add Transaction */}
+      <Card className="mb-8">
+        <h2 className="text-lg font-semibold mb-4">
+          Add New Transaction
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <select
             value={form.asset}
-            onChange={(e) => setForm({ ...form, asset: e.target.value })}
-            className="bg-white/5 text-white rounded px-3 py-2
-                       focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+            onChange={(e) =>
+              setForm({ ...form, asset: e.target.value })
+            }
+            className="bg-white/5 text-white rounded px-3 py-2 focus:ring-2 focus:ring-purple-500/40"
           >
             {COINS.map((coin) => (
               <option
                 key={coin.symbol}
                 value={coin.symbol}
-                className="bg-[#0b021f] text-white"
+                className="bg-[#0b021f]"
               >
                 {coin.symbol} – {coin.name}
               </option>
             ))}
           </select>
 
-          {/* Type */}
           <select
             value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="bg-white/5 text-white rounded px-3 py-2
-                       focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+            onChange={(e) =>
+              setForm({ ...form, type: e.target.value })
+            }
+            className="bg-white/5 text-white rounded px-3 py-2 focus:ring-2 focus:ring-purple-500/40"
           >
-            <option value="BUY" className="bg-[#0b021f] text-white">
+            <option value="BUY" className="bg-[#0b021f]">
               BUY
             </option>
-            <option value="SELL" className="bg-[#0b021f] text-white">
+            <option value="SELL" className="bg-[#0b021f]">
               SELL
             </option>
           </select>
 
-          {/* Quantity */}
           <input
             type="number"
             placeholder="Quantity"
             value={form.quantity}
-            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-            className="bg-white/5 rounded px-3 py-2 text-white
-                       placeholder-gray-400 focus:outline-none
-                       focus:ring-2 focus:ring-purple-500/40"
+            onChange={(e) =>
+              setForm({ ...form, quantity: e.target.value })
+            }
+            className="bg-white/5 rounded px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500/40"
           />
 
-          {/* Price */}
           <input
             type="number"
             placeholder="Price"
             value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            className="bg-white/5 rounded px-3 py-2 text-white
-                       placeholder-gray-400 focus:outline-none
-                       focus:ring-2 focus:ring-purple-500/40"
+            onChange={(e) =>
+              setForm({ ...form, price: e.target.value })
+            }
+            className="bg-white/5 rounded px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500/40"
           />
 
-          {/* Add Button */}
           <button
             onClick={addTransaction}
-            className="bg-purple-600 hover:bg-purple-700
-                       rounded px-4 py-2 font-semibold transition"
+            className="bg-purple-600 hover:bg-purple-700 rounded px-4 py-2 font-semibold transition"
           >
-            Add
+            Add Transaction
           </button>
         </div>
       </Card>
 
-      {/* Transactions Table */}
+      {/* Transactions History */}
       <Card>
+        <h2 className="text-lg font-semibold mb-4">
+          Transaction History
+        </h2>
+
         {loading ? (
           <p className="text-center py-6 text-gray-400">
             Loading transactions...
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-sm">
               <thead className="text-gray-400 border-b border-white/10">
                 <tr>
                   <th className="py-3">Date</th>
                   <th>Asset</th>
                   <th>Type</th>
-                  <th>Quantity</th>
+                  <th>Qty</th>
                   <th>Price</th>
                   <th>Value</th>
                   <th></th>
@@ -196,7 +193,7 @@ export default function TransactionsPage() {
                   return (
                     <tr
                       key={tx.id}
-                      className="border-b border-white/5 last:border-0"
+                      className="border-b border-white/5 hover:bg-white/5 transition"
                     >
                       <td className="py-3">{tx.date}</td>
                       <td className="font-medium">{tx.asset}</td>
@@ -215,8 +212,8 @@ export default function TransactionsPage() {
                       </td>
 
                       <td>{tx.quantity}</td>
-                      <td>${tx.price}</td>
-                      <td>${value.toLocaleString()}</td>
+                      <td>₹{tx.price}</td>
+                      <td>₹{value.toLocaleString()}</td>
 
                       <td className="text-right">
                         <button
@@ -232,7 +229,10 @@ export default function TransactionsPage() {
 
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="text-center py-6 text-gray-400">
+                    <td
+                      colSpan="7"
+                      className="text-center py-6 text-gray-400"
+                    >
                       No transactions found
                     </td>
                   </tr>

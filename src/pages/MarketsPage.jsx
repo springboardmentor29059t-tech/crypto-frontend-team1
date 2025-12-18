@@ -5,12 +5,20 @@ import {
   isInWatchlist,
 } from "../utils/watchlist";
 
+/* ✅ INR formatter */
+const formatINR = (value) =>
+  value.toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  });
+
 export default function MarketsPage() {
   const [coins, setCoins] = useState([]);
 
   useEffect(() => {
     fetch(
-      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc"
+      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=inr&order=market_cap_desc"
     )
       .then((res) => res.json())
       .then((data) => setCoins(data))
@@ -41,7 +49,7 @@ export default function MarketsPage() {
           <thead className="text-gray-300 bg-white/5">
             <tr>
               <th className="p-3">Coin</th>
-              <th className="p-3">Price</th>
+              <th className="p-3">Price (₹)</th>
               <th className="p-3">24h %</th>
               <th className="p-3">Watchlist</th>
             </tr>
@@ -50,35 +58,36 @@ export default function MarketsPage() {
           <tbody>
             {coins.map((coin) => {
               const added = isInWatchlist(coin.id);
+              const change = coin.price_change_percentage_24h;
 
               return (
                 <tr
                   key={coin.id}
                   className="border-t border-white/10 hover:bg-white/5 transition"
                 >
+                  {/* Coin */}
                   <td className="p-3 flex items-center gap-2">
                     <img src={coin.image} alt="" className="w-6 h-6" />
                     {coin.name}
                   </td>
 
+                  {/* Price */}
                   <td className="p-3">
                     {coin.current_price != null
-                      ? `$${coin.current_price.toFixed(2)}`
+                      ? formatINR(coin.current_price)
                       : "—"}
                   </td>
 
+                  {/* 24h Change */}
                   <td
                     className={`p-3 ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
+                      change >= 0 ? "text-green-400" : "text-red-400"
                     }`}
                   >
-                    {coin.price_change_percentage_24h != null
-                      ? `${coin.price_change_percentage_24h.toFixed(2)}%`
-                      : "—"}
+                    {change != null ? `${change.toFixed(2)}%` : "—"}
                   </td>
 
+                  {/* Watchlist */}
                   <td className="p-3">
                     <button
                       onClick={() => toggleWatchlist(coin)}

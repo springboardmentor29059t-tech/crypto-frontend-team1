@@ -21,7 +21,7 @@ export const fetchPrices = async (symbols) => {
     {
       params: {
         ids,
-        vs_currencies: "usd",
+        vs_currencies: "inr",
       },
     }
   );

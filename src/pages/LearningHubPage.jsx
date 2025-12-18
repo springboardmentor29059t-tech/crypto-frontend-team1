@@ -14,7 +14,7 @@ export default function LearningHub() {
   });
 
   const toggle = (m, l) => {
-    const key = `${m}-${l}`;
+    const key = `₹{m}-₹{l}`;
     const next = {...completed, [key]: !completed[key]};
     setCompleted(next);
     localStorage.setItem("learningCompleted", JSON.stringify(next));
@@ -31,7 +31,7 @@ export default function LearningHub() {
             <h3 className="text-xl font-semibold mb-3">{m.title}</h3>
             <div className="space-y-2">
               {m.lessons.map((l, idx) => {
-                const key = `${m.id}-${idx}`;
+                const key = `₹{m.id}-₹{idx}`;
                 return (
                   <div key={key} className="flex items-center justify-between">
                     <div>{l}</div>

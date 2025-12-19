@@ -34,7 +34,7 @@ export default function Alerts() {
             <option value="cardano">Cardano</option>
             <option value="ripple">XRP</option>
           </select>
-          <input value={form.price} onChange={e=>setForm({...form, price:e.target.value})} placeholder="Price in USD"
+          <input value={form.price} onChange={e=>setForm({...form, price:e.target.value})} placeholder="Price in INR"
                  className="px-3 py-2 bg-white/5 rounded-lg flex-1"/>
           <button onClick={addAlert} className="px-4 py-2 rounded-lg bg-emerald-500">Add Alert</button>
         </div>
@@ -48,7 +48,7 @@ export default function Alerts() {
             <div key={a.id} className="flex items-center justify-between">
               <div>
                 <div className="font-semibold">{a.coin.toUpperCase()}</div>
-                <div className="text-sm text-gray-400">Target ${a.price} • created {new Date(a.createdAt).toLocaleString()}</div>
+                <div className="text-sm text-gray-400">Target ₹{a.price} • created {new Date(a.createdAt).toLocaleString()}</div>
               </div>
               <div>
                 <button onClick={() => remove(a.id)} className="text-red-400 text-sm">Delete</button>

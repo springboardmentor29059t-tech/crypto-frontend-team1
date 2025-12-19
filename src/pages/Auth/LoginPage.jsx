@@ -99,6 +99,17 @@ export default function LoginPage() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+        {/* signup link */}
+<p className="text-gray-300 text-center mt-4">
+  Don’t have an account?{" "}
+  <span
+    onClick={() => navigate("/signup")}
+    className="text-purple-400 cursor-pointer hover:underline"
+  >
+    Create one
+  </span>
+</p>
+
 
       </form>
     </AuthLayout>

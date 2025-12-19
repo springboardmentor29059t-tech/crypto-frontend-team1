@@ -28,7 +28,7 @@ export default function NewsPage() {
       .catch(() => {
         // fallback dummy news (safe)
         setNews([
-          { id:1, title: "BTC holds strong above $40k", source:"Local", url:"#", publishedAt:"2025-11-20" },
+          { id:1, title: "BTC holds strong above ₹40k", source:"Local", url:"#", publishedAt:"2025-11-20" },
           { id:2, title: "Ethereum upgrade shows positive signs", source:"Local", url:"#", publishedAt:"2025-11-19" },
           { id:3, title: "Solana performance improves after update", source:"Local", url:"#", publishedAt:"2025-11-18" },
         ]);

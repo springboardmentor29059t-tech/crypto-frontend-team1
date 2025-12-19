@@ -1,15 +1,8 @@
 import React from "react";
 
-const MOCK_PORTFOLIO = [
-  { symbol: "BTC", name: "Bitcoin",   holdings: 0.05, price: 68000, change24h: 2.3 },
-  { symbol: "ETH", name: "Ethereum",  holdings: 0.8,  price: 3500,  change24h: 4.1 },
-  { symbol: "SOL", name: "Solana",    holdings: 10,   price: 180,   change24h: -1.2 },
-  { symbol: "MATIC", name: "Polygon", holdings: 150,  price: 0.95,  change24h: 0.8 },
-];
-
-export default function PortfolioSection() {
-  const totalValue = MOCK_PORTFOLIO.reduce(
-    (sum, c) => sum + c.holdings * c.price,
+export default function PortfolioSection({ holdings = [], loading }) {
+  const totalValue = holdings.reduce(
+    (sum, c) => sum + c.quantity * c.currentPrice,
     0
   );
 
@@ -19,11 +12,13 @@ export default function PortfolioSection() {
         <div>
           <h2 className="text-xl font-semibold">Your Crypto Assets</h2>
           <p className="text-xs text-gray-400 mt-1">
-            Demo data – later we’ll replace this with real API.
+            {loading
+              ? "Fetching portfolio from exchange..."
+              : "Synced from connected exchange"}
           </p>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-200">
-          Total ≈ ${totalValue.toLocaleString()}
+          Total ≈ ₹{totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
       </div>
 
@@ -38,20 +33,38 @@ export default function PortfolioSection() {
               <th className="py-2 text-right">Value</th>
             </tr>
           </thead>
+
           <tbody>
-            {MOCK_PORTFOLIO.map((coin) => {
-              const value = coin.holdings * coin.price;
+            {!loading && holdings.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-6 text-gray-400">
+                  No assets found. Connect an exchange to begin.
+                </td>
+              </tr>
+            )}
+
+            {holdings.map((coin) => {
+              const value = coin.quantity * coin.currentPrice;
               const isUp = coin.change24h >= 0;
+
               return (
-                <tr key={coin.symbol} className="border-b border-white/5 last:border-0">
+                <tr
+                  key={coin.symbol}
+                  className="border-b border-white/5 last:border-0"
+                >
                   <td className="py-2">
                     <span className="font-semibold">{coin.symbol}</span>{" "}
                     <span className="text-gray-400 text-xs ml-1">
                       {coin.name}
                     </span>
                   </td>
-                  <td className="py-2">{coin.holdings}</td>
-                  <td className="py-2">${coin.price.toLocaleString()}</td>
+
+                  <td className="py-2">{coin.quantity}</td>
+
+                  <td className="py-2">
+                    ₹{coin.currentPrice.toLocaleString()}
+                  </td>
+
                   <td className="py-2">
                     <span
                       className={
@@ -63,14 +76,23 @@ export default function PortfolioSection() {
                       {coin.change24h}%
                     </span>
                   </td>
+
                   <td className="py-2 text-right">
-                    ${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    ₹{value.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+
+        {loading && (
+          <p className="text-center text-gray-400 py-6">
+            Loading assets...
+          </p>
+        )}
       </div>
     </div>
   );

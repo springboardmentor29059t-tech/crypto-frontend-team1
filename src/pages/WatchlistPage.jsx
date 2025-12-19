@@ -30,7 +30,7 @@ export default function WatchlistPage() {
               <div className="flex-1">
                 <p className="text-lg font-semibold">{coin.name}</p>
                 <p className="text-gray-400 uppercase text-sm">{coin.symbol}</p>
-                <p className="text-purple-300 mt-1">${coin.price}</p>
+                <p className="text-purple-300 mt-1">₹{coin.price}</p>
               </div>
 
               <button

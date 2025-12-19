@@ -6,7 +6,7 @@ import {
   deleteTransactionApi,
 } from "../api/transactionsApi";
 
-/* 🔹 Supported coins list */
+/* 🔹 Supported coins */
 const COINS = [
   { symbol: "BTC", name: "Bitcoin" },
   { symbol: "ETH", name: "Ethereum" },
@@ -27,7 +27,6 @@ export default function TransactionsPage() {
     type: "BUY",
     quantity: "",
     price: "",
-    date: new Date().toISOString().slice(0, 10),
   });
 
   useEffect(() => {
@@ -65,7 +64,6 @@ export default function TransactionsPage() {
         type: "BUY",
         quantity: "",
         price: "",
-        date: new Date().toISOString().slice(0, 10),
       });
     } catch {
       console.log("Failed to add transaction");
@@ -82,28 +80,30 @@ export default function TransactionsPage() {
   };
 
   return (
-    <>
-      {/* Header */}
-      <div className="mb-8">
+    <div className="space-y-10">
+      {/* 🔹 Page Header */}
+      <div>
         <h1 className="text-3xl font-bold">Transactions</h1>
         <p className="text-sm text-gray-400 mt-1">
-          Buy & sell history synced from backend
+          Manage and track all your buy & sell activity
         </p>
       </div>
 
-      {/* Add Transaction */}
-      <Card className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">
+      {/* 🔹 Add Transaction */}
+      <Card>
+        <h2 className="text-lg font-semibold mb-6">
           Add New Transaction
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* Asset */}
           <select
             value={form.asset}
             onChange={(e) =>
               setForm({ ...form, asset: e.target.value })
             }
-            className="bg-white/5 text-white rounded px-3 py-2 focus:ring-2 focus:ring-purple-500/40"
+            className="bg-white/5 text-white rounded-lg px-4 py-2
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/40"
           >
             {COINS.map((coin) => (
               <option
@@ -116,12 +116,14 @@ export default function TransactionsPage() {
             ))}
           </select>
 
+          {/* Type */}
           <select
             value={form.type}
             onChange={(e) =>
               setForm({ ...form, type: e.target.value })
             }
-            className="bg-white/5 text-white rounded px-3 py-2 focus:ring-2 focus:ring-purple-500/40"
+            className="bg-white/5 text-white rounded-lg px-4 py-2
+                       focus:outline-none focus:ring-2 focus:ring-purple-500/40"
           >
             <option value="BUY" className="bg-[#0b021f]">
               BUY
@@ -131,6 +133,7 @@ export default function TransactionsPage() {
             </option>
           </select>
 
+          {/* Quantity */}
           <input
             type="number"
             placeholder="Quantity"
@@ -138,36 +141,43 @@ export default function TransactionsPage() {
             onChange={(e) =>
               setForm({ ...form, quantity: e.target.value })
             }
-            className="bg-white/5 rounded px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500/40"
+            className="bg-white/5 rounded-lg px-4 py-2 text-white
+                       placeholder-gray-400 focus:outline-none
+                       focus:ring-2 focus:ring-purple-500/40"
           />
 
+          {/* Price */}
           <input
             type="number"
-            placeholder="Price"
+            placeholder="Price (₹)"
             value={form.price}
             onChange={(e) =>
               setForm({ ...form, price: e.target.value })
             }
-            className="bg-white/5 rounded px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500/40"
+            className="bg-white/5 rounded-lg px-4 py-2 text-white
+                       placeholder-gray-400 focus:outline-none
+                       focus:ring-2 focus:ring-purple-500/40"
           />
 
+          {/* Button */}
           <button
             onClick={addTransaction}
-            className="bg-purple-600 hover:bg-purple-700 rounded px-4 py-2 font-semibold transition"
+            className="bg-purple-600 hover:bg-purple-700
+                       rounded-lg px-4 py-2 font-semibold transition"
           >
             Add Transaction
           </button>
         </div>
       </Card>
 
-      {/* Transactions History */}
+      {/* 🔹 Transactions Table */}
       <Card>
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-lg font-semibold mb-6">
           Transaction History
         </h2>
 
         {loading ? (
-          <p className="text-center py-6 text-gray-400">
+          <p className="text-center py-10 text-gray-400">
             Loading transactions...
           </p>
         ) : (
@@ -175,12 +185,11 @@ export default function TransactionsPage() {
             <table className="w-full text-sm">
               <thead className="text-gray-400 border-b border-white/10">
                 <tr>
-                  <th className="py-3">Date</th>
-                  <th>Asset</th>
-                  <th>Type</th>
-                  <th>Qty</th>
-                  <th>Price</th>
-                  <th>Value</th>
+                  <th className="text-left py-3">Asset</th>
+                  <th className="text-center">Type</th>
+                  <th className="text-right">Qty</th>
+                  <th className="text-right">Price (₹)</th>
+                  <th className="text-right">Value (₹)</th>
                   <th></th>
                 </tr>
               </thead>
@@ -195,13 +204,14 @@ export default function TransactionsPage() {
                       key={tx.id}
                       className="border-b border-white/5 hover:bg-white/5 transition"
                     >
-                      <td className="py-3">{tx.date}</td>
-                      <td className="font-medium">{tx.asset}</td>
+                      <td className="py-4 font-medium">
+                        {tx.asset}
+                      </td>
 
-                      <td>
+                      <td className="text-center">
                         <span
                           className={
-                            "text-xs px-2 py-1 rounded-full font-semibold " +
+                            "text-xs px-3 py-1 rounded-full font-semibold " +
                             (isBuy
                               ? "bg-emerald-500/15 text-emerald-400"
                               : "bg-red-500/15 text-red-400")
@@ -211,9 +221,17 @@ export default function TransactionsPage() {
                         </span>
                       </td>
 
-                      <td>{tx.quantity}</td>
-                      <td>₹{tx.price}</td>
-                      <td>₹{value.toLocaleString()}</td>
+                      <td className="text-right">
+                        {tx.quantity}
+                      </td>
+
+                      <td className="text-right">
+                        ₹{tx.price.toLocaleString()}
+                      </td>
+
+                      <td className="text-right font-medium">
+                        ₹{value.toLocaleString()}
+                      </td>
 
                       <td className="text-right">
                         <button
@@ -230,8 +248,8 @@ export default function TransactionsPage() {
                 {transactions.length === 0 && (
                   <tr>
                     <td
-                      colSpan="7"
-                      className="text-center py-6 text-gray-400"
+                      colSpan="6"
+                      className="text-center py-10 text-gray-400"
                     >
                       No transactions found
                     </td>
@@ -242,6 +260,6 @@ export default function TransactionsPage() {
           </div>
         )}
       </Card>
-    </>
+    </div>
   );
 }

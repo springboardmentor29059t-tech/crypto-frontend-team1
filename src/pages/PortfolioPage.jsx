@@ -26,6 +26,7 @@ export default function PortfolioPage() {
       })
       .catch(() => console.log("Failed to load portfolio"))
       .finally(() => setLoading(false));
+      
   }, []);
 
   const totalValue = holdings.reduce((sum, h) => {

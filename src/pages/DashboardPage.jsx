@@ -1,5 +1,4 @@
-// src/pages/DashboardPage.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
@@ -12,7 +11,7 @@ export default function DashboardPage() {
 
   const navigate = useNavigate();
 
-  // 🔹 Fetch logged-in user
+  /* 🔹 Fetch logged-in user */
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -24,40 +23,34 @@ export default function DashboardPage() {
       .catch(() => console.log("User fetch error"));
   }, []);
 
-  // 🔹 Fetch portfolio + prices
+  /* 🔹 Fetch portfolio + prices */
   useEffect(() => {
-    fetchPortfolioHoldings()
-      .then(async (data) => {
+    const loadDashboard = async () => {
+      try {
+        const data = await fetchPortfolioHoldings();
         setHoldings(data);
+
         const symbols = data.map((h) => h.asset);
         const priceData = await fetchPrices(symbols);
         setPrices(priceData);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
   }, []);
 
-  // 🔹 Calculations
+  /* 🔹 Calculations */
   let totalValue = 0;
-  let bestAsset = null;
-  let bestAssetPct = 0;
   let totalPL = 0;
+  let bestAsset = null;
+  let bestAssetPct = -Infinity;
 
   holdings.forEach((h) => {
-    const id =
-      h.asset === "BTC"
-        ? "bitcoin"
-        : h.asset === "ETH"
-        ? "ethereum"
-        : h.asset === "SOL"
-        ? "solana"
-        : h.asset === "MATIC"
-        ? "polygon"
-        : null;
-
-    const currentPrice = id ? prices?.[id]?.inr || 0 : 0;
-
     const qty = Number(h.quantity || 0);
     const avgBuy = Number(h.avgBuyPrice || 0);
+    const currentPrice = Number(prices[h.asset] || 0);
 
     const invested = qty * avgBuy;
     const current = qty * currentPrice;
@@ -140,7 +133,8 @@ export default function DashboardPage() {
               (totalPL >= 0 ? "text-green-400" : "text-red-400")
             }
           >
-            {totalPL >= 0 ? "+" : "-"}₹{Math.abs(totalPL).toLocaleString()}
+            {totalPL >= 0 ? "+" : "-"}₹
+            {Math.abs(totalPL).toLocaleString()}
           </div>
           <p className="text-gray-300 mt-2">
             Based on avg buy vs current price

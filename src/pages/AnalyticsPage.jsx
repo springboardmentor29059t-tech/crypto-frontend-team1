@@ -31,7 +31,7 @@ export default function AnalyticsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 🔹 Map asset → coingecko id
+  // 🔹 Asset → CoinGecko ID
   const getPriceId = (asset) => {
     switch (asset) {
       case "BTC":
@@ -47,18 +47,23 @@ export default function AnalyticsPage() {
     }
   };
 
-  // 🔹 Chart data
-  const chartData = holdings.map((h) => {
-    const id = getPriceId(h.asset);
-    const price = id ? prices?.[id]?.inr || 0 : 0;
+  // 🔹 Chart data (SAFE + FILTERED)
+  const chartData = holdings
+  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
+  .map((h) => {
 
-    return {
-      name: h.asset,
-      value: Number(h.quantity) * price,
-    };
-  });
+      const id = getPriceId(h.asset);
+      const rawPrice = prices?.[id]?.inr;
+      const price = typeof rawPrice === "number" ? rawPrice : 0;
 
-  const totalValue = chartData.reduce((s, d) => s + d.value, 0);
+      return {
+        name: h.asset,
+        value: Number(h.quantity || 0) * price,
+      };
+    })
+    .filter((d) => d.value > 0);
+
+  const totalValue = chartData.reduce((sum, d) => sum + d.value, 0);
 
   const topAsset =
     chartData.length > 0
@@ -66,16 +71,25 @@ export default function AnalyticsPage() {
       : null;
 
   // 🔹 Profit & Loss calculations
-  const totalInvested = holdings.reduce(
-    (sum, h) => sum + Number(h.quantity) * Number(h.avgBuyPrice || 0),
-    0
-  );
+ const totalInvested = holdings
+  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
+  .reduce((sum, h) => {
+    const qty = Number(h.quantity || 0);
+    const avg = Number(h.avgBuyPrice || 0);
+    return sum + qty * avg;
+  }, 0);
 
-  const currentValue = holdings.reduce((sum, h) => {
+  const currentValue = holdings
+  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
+  .reduce((sum, h) => {
     const id = getPriceId(h.asset);
-    const price = id ? prices?.[id]?.inr || 0 : 0;
+    const price = typeof prices?.[id]?.inr === "number"
+      ? prices[id].inr
+      : 0;
+
     return sum + Number(h.quantity) * price;
   }, 0);
+
 
   const netPnl = currentValue - totalInvested;
   const pnlPct =
@@ -110,8 +124,15 @@ export default function AnalyticsPage() {
       {/* 🔹 Profit & Loss Button */}
       <div className="flex justify-center mb-6">
         <button
+          disabled={loading}
           onClick={() => setShowPnL(!showPnL)}
-          className="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition font-semibold"
+          className={`px-6 py-2 rounded-lg font-semibold transition
+            ${
+              loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-700"
+            }
+          `}
         >
           {showPnL ? "Hide Profit & Loss" : "Check Profit & Loss"}
         </button>
@@ -161,6 +182,10 @@ export default function AnalyticsPage() {
 
           {loading ? (
             <p className="text-gray-400">Loading chart...</p>
+          ) : chartData.length === 0 ? (
+            <p className="text-gray-400 text-center">
+              No data available
+            </p>
           ) : (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">

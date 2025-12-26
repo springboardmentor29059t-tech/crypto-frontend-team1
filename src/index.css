@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  background: radial-gradient(
+    circle at top,
+    #1e1b4b,
+    #020617 70%
+  );
+}
+header,
+.navbar {
+  background: linear-gradient(90deg, #4f46e5, #06b6d4);
+}

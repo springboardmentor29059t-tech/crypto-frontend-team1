@@ -5,6 +5,8 @@ import {
   addTransactionApi,
   deleteTransactionApi,
 } from "../api/transactionsApi";
+import { fetchRiskAlerts } from "../api/riskAlertsApi";
+import RiskPopup from "../components/RiskPopup";
 
 /* 🔹 Supported coins */
 const COINS = [
@@ -16,11 +18,17 @@ const COINS = [
   { symbol: "XRP", name: "Ripple" },
   { symbol: "DOT", name: "Polkadot" },
   { symbol: "AVAX", name: "Avalanche" },
+
+  // ⚠️ Risk-test assets
+  { symbol: "LUNA", name: "Terra Luna (High Risk)" },
+  { symbol: "SQUID", name: "Squid Token (Scam)" },
 ];
+
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [riskPopup, setRiskPopup] = useState(null);
 
   const [form, setForm] = useState({
     asset: "BTC",
@@ -29,6 +37,7 @@ export default function TransactionsPage() {
     price: "",
   });
 
+  /* 🔹 Load transactions */
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -44,6 +53,7 @@ export default function TransactionsPage() {
     }
   };
 
+  /* 🔹 Add transaction + risk check */
   const addTransaction = async () => {
     if (!form.quantity || !form.price) {
       alert("Quantity and Price must be greater than 0");
@@ -59,6 +69,12 @@ export default function TransactionsPage() {
 
       setTransactions((prev) => [saved, ...prev]);
 
+      // 🔔 Fetch latest risk alert
+      const riskAlerts = await fetchRiskAlerts();
+      if (riskAlerts.length > 0) {
+        setRiskPopup(riskAlerts[0]);
+      }
+
       setForm({
         asset: "BTC",
         type: "BUY",
@@ -70,6 +86,7 @@ export default function TransactionsPage() {
     }
   };
 
+  /* 🔹 Delete transaction */
   const deleteTransaction = async (id) => {
     try {
       await deleteTransactionApi(id);
@@ -80,7 +97,13 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 text-white">
+      {/* 🔔 Risk Popup */}
+      <RiskPopup
+        alert={riskPopup}
+        onClose={() => setRiskPopup(null)}
+      />
+
       {/* 🔹 Page Header */}
       <div>
         <h1 className="text-3xl font-bold">Transactions</h1>

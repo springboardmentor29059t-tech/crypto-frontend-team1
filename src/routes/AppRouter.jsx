@@ -19,6 +19,7 @@ import SettingsPage from "../pages/SettingsPage";
 // ⭐ NEW IMPORTS — API Key pages
 import AddApiKeyPage from "../pages/AddApiKeyPage";
 import ApiKeysListPage from "../pages/ApiKeysListPage";
+import RiskAlertsPage from "../pages/RiskAlertPage";
 
 export default function AppRouter() {
   return (
@@ -42,6 +43,7 @@ export default function AppRouter() {
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/learning" element={<LearningHubPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/risk-alerts" element={<RiskAlertsPage/>} />
 
           {/* ⭐ NEW API KEY ROUTES */}
           <Route path="/add-key" element={<AddApiKeyPage />} />

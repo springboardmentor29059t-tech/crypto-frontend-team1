@@ -3,7 +3,16 @@ import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
 import HoldingsTable from "../components/portfolio/HoldingsTable";
 
-/* 🔹 INR formatter */
+const COIN_ID_MAP = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  SOL: "solana",
+  ADA: "cardano",
+  XRP: "ripple",
+  BNB: "binancecoin",
+};
+
+/* INR formatter */
 const formatINR = (value) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -25,7 +34,7 @@ export default function PortfolioPage() {
         const symbols = data.map((h) => h.asset);
         const priceData = await fetchPrices(symbols);
         setPrices(priceData);
-      } catch (err) {
+      } catch {
         console.log("Failed to load portfolio");
       } finally {
         setLoading(false);
@@ -35,9 +44,10 @@ export default function PortfolioPage() {
     loadPortfolio();
   }, []);
 
-  /* 🔹 Total Portfolio Value (INR) */
+  // ✅ FIXED total value calculation
   const totalValue = holdings.reduce((sum, h) => {
-    const price = Number(prices[h.asset] || 0);
+    const coinId = COIN_ID_MAP[h.asset];
+    const price = coinId ? prices[coinId]?.inr || 0 : 0;
     return sum + Number(h.quantity || 0) * price;
   }, 0);
 
@@ -45,7 +55,6 @@ export default function PortfolioPage() {
     <>
       <h1 className="text-3xl font-bold mb-6">Portfolio</h1>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white/5 p-6 rounded-xl">
           <p className="text-gray-400">Assets</p>
@@ -59,13 +68,10 @@ export default function PortfolioPage() {
 
         <div className="bg-white/5 p-6 rounded-xl">
           <p className="text-gray-400">Price Source</p>
-          <p className="text-sm text-gray-300">
-            Backend Snapshots (INR)
-          </p>
+          <p className="text-sm text-gray-300">CoinGecko (Live INR)</p>
         </div>
       </div>
 
-      {/* Holdings Table */}
       {loading ? (
         <p className="mt-6 text-gray-400">Loading portfolio…</p>
       ) : (

@@ -1,20 +1,24 @@
 import axios from "axios";
 
-// Fetch prices from CoinGecko
+// Fetch prices from CoinGecko (INR)
 export const fetchPrices = async (symbols) => {
-  if (symbols.length === 0) return {};
+  if (!symbols || symbols.length === 0) return {};
 
   const idsMap = {
     BTC: "bitcoin",
     ETH: "ethereum",
     SOL: "solana",
-    MATIC: "polygon",
+    ADA: "cardano",
+    XRP: "ripple",
+    BNB: "binancecoin",
   };
 
   const ids = symbols
     .map((s) => idsMap[s])
     .filter(Boolean)
     .join(",");
+
+  if (!ids) return {};
 
   const res = await axios.get(
     "https://api.coingecko.com/api/v3/simple/price",
@@ -26,5 +30,5 @@ export const fetchPrices = async (symbols) => {
     }
   );
 
-  return res.data;
+  return res.data; // { bitcoin: { inr: 7900000 }, ... }
 };

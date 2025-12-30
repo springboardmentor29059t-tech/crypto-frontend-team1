@@ -3,6 +3,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
 
+const COIN_ID_MAP = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  SOL: "solana",
+  ADA: "cardano",
+  XRP: "ripple",
+  BNB: "binancecoin",
+};
+
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const [holdings, setHoldings] = useState([]);
@@ -11,37 +20,31 @@ export default function DashboardPage() {
 
   const navigate = useNavigate();
 
-  /* 🔹 Fetch logged-in user */
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     fetch("http://localhost:8080/api/user/me", {
       headers: { Authorization: "Bearer " + token },
     })
       .then((res) => res.json())
-      .then((data) => setUser(data))
-      .catch(() => console.log("User fetch error"));
+      .then(setUser)
+      .catch(() => {});
   }, []);
 
-  /* 🔹 Fetch portfolio + prices */
   useEffect(() => {
     const loadDashboard = async () => {
-      try {
-        const data = await fetchPortfolioHoldings();
-        setHoldings(data);
+      const data = await fetchPortfolioHoldings();
+      setHoldings(data);
 
-        const symbols = data.map((h) => h.asset);
-        const priceData = await fetchPrices(symbols);
-        setPrices(priceData);
-      } finally {
-        setLoading(false);
-      }
+      const symbols = data.map((h) => h.asset);
+      const priceData = await fetchPrices(symbols);
+      setPrices(priceData);
+
+      setLoading(false);
     };
 
     loadDashboard();
   }, []);
 
-  /* 🔹 Calculations */
   let totalValue = 0;
   let totalPL = 0;
   let bestAsset = null;
@@ -50,7 +53,9 @@ export default function DashboardPage() {
   holdings.forEach((h) => {
     const qty = Number(h.quantity || 0);
     const avgBuy = Number(h.avgBuyPrice || 0);
-    const currentPrice = Number(prices[h.asset] || 0);
+
+    const coinId = COIN_ID_MAP[h.asset];
+    const currentPrice = coinId ? prices[coinId]?.inr || 0 : 0;
 
     const invested = qty * avgBuy;
     const current = qty * currentPrice;
@@ -68,7 +73,6 @@ export default function DashboardPage() {
 
   return (
     <div className="text-white">
-      {/* Top Bar */}
       <div className="flex justify-between items-center mb-10">
         <div>
           <h1 className="text-4xl font-extrabold">
@@ -79,98 +83,44 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Profile Icon */}
         <div
           onClick={() => navigate("/settings")}
-          className="
-            w-12 h-12 flex items-center justify-center
-            bg-gradient-to-tr from-purple-500 via-pink-500 to-blue-400
-            rounded-full cursor-pointer
-            shadow-[0_0_25px_rgba(168,85,247,0.6)]
-            text-xl font-bold hover:scale-105 transition
-          "
+          className="w-12 h-12 flex items-center justify-center bg-purple-600 rounded-full cursor-pointer text-xl font-bold"
         >
           {user ? user.name.charAt(0).toUpperCase() : "?"}
         </div>
       </div>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Portfolio Value */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-          <p className="text-xs text-gray-400 uppercase tracking-wide">
-            Portfolio Value
-          </p>
-          <div className="text-3xl font-bold mt-3">
+        <div className="bg-white/5 p-6 rounded-2xl">
+          <p className="text-xs text-gray-400">Portfolio Value</p>
+          <p className="text-3xl font-bold mt-3">
             ₹{totalValue.toLocaleString()}
-          </div>
-          <p className="text-sm text-gray-300 mt-2">
-            Across {holdings.length} assets
           </p>
         </div>
 
-        {/* Best Performer */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-          <p className="text-xs text-gray-400 uppercase tracking-wide">
-            Best Performer
-          </p>
-          <div className="text-3xl font-bold mt-3">
-            {bestAsset || "--"}
-          </div>
-          <div className="text-green-400 mt-2">
+        <div className="bg-white/5 p-6 rounded-2xl">
+          <p className="text-xs text-gray-400">Best Performer</p>
+          <p className="text-3xl font-bold mt-3">{bestAsset || "--"}</p>
+          <p className="text-green-400">
             {bestAsset ? `+${bestAssetPct.toFixed(1)}%` : "--"}
-          </div>
-        </div>
-
-        {/* Total P/L */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-          <p className="text-xs text-gray-400 uppercase tracking-wide">
-            Overall P / L
-          </p>
-          <div
-            className={
-              "text-3xl font-bold mt-3 " +
-              (totalPL >= 0 ? "text-green-400" : "text-red-400")
-            }
-          >
-            {totalPL >= 0 ? "+" : "-"}₹
-            {Math.abs(totalPL).toLocaleString()}
-          </div>
-          <p className="text-gray-300 mt-2">
-            Based on avg buy vs current price
           </p>
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-10 backdrop-blur-xl">
-        <h2 className="text-xl font-semibold text-gray-200 mb-4">
-          Quick Actions 🚀
-        </h2>
-
-        <div className="flex gap-4 flex-wrap">
-          <Link
-            to="/add-key"
-            className="px-6 py-3 rounded-xl font-semibold
-              bg-gradient-to-r from-purple-600 to-pink-500
-              text-white shadow-lg hover:scale-105 transition"
+        <div className="bg-white/5 p-6 rounded-2xl">
+          <p className="text-xs text-gray-400">Overall P/L</p>
+          <p
+            className={`text-3xl font-bold ${
+              totalPL >= 0 ? "text-green-400" : "text-red-400"
+            }`}
           >
-            Add API Key
-          </Link>
-
-          <Link
-            to="/keys"
-            className="px-6 py-3 rounded-xl font-semibold
-              bg-gradient-to-r from-blue-500 to-purple-500
-              text-white shadow-lg hover:scale-105 transition"
-          >
-            View API Keys
-          </Link>
+            {totalPL >= 0 ? "+" : "-"}₹{Math.abs(totalPL).toLocaleString()}
+          </p>
         </div>
       </div>
 
       {loading && (
-        <p className="text-gray-400 mt-6">Loading dashboard data...</p>
+        <p className="text-gray-400 mt-6">Loading dashboard...</p>
       )}
     </div>
   );

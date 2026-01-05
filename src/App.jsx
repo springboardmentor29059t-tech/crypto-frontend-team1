@@ -32,15 +32,20 @@ function App() {
       setActivePage={setActivePage} 
       handleLogout={handleLogout}
     >
-      {activePage === 'Settings' && <Dashboard userId={userId} />}
-      
+      {/* 1. Dashboard / Portfolio */}
       {activePage === 'Portfolio' && (
         <PortfolioView userId={userId} setActivePage={setActivePage} />
       )}
 
-      {(activePage === 'Markets' || activePage === 'Risk Analysis') && (
-        <div className="flex items-center justify-center h-full text-slate-500 border-2 border-dashed border-slate-700 rounded-xl">
-          Module Coming Soon (Milestone 3)
+      {/* 2. Settings */}
+      {activePage === 'Settings' && <Dashboard userId={userId} />}
+
+      {/* 3. Placeholder for New/Future Pages */}
+      {(activePage === 'Markets' || activePage === 'Risk Analysis' || activePage === 'Transactions' || activePage === 'Exchanges') && (
+        <div className="flex flex-col items-center justify-center h-full text-slate-500 border-2 border-dashed border-slate-700 rounded-xl bg-slate-800/50">
+          <div className="text-4xl mb-4">🚧</div>
+          <h2 className="text-xl font-bold text-slate-300">Module Coming Soon</h2>
+          <p className="text-sm opacity-70">We are building the {activePage} feature.</p>
         </div>
       )}
     </Layout>

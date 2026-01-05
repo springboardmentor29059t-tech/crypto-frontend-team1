@@ -38,7 +38,10 @@ export default function Signup({ setUserId }) {
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="bg-surface p-8 rounded-lg shadow-lg w-96 border border-slate-700">
-        <h2 className="text-2xl font-bold text-accent mb-6 text-center">DigiWealth Join</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-accent">DigiWealth</h2>
+          <p className="text-gray-400 text-sm tracking-widest mt-1">Track. Analyze. Secure.</p>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <input 

@@ -37,37 +37,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-
-// import { createContext, useContext, useState } from "react";
-
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//   const [isLoggedIn, setIsLoggedIn] = useState(
-//     localStorage.getItem("isLoggedIn") === "true"
-//   );
-
-//   const login = (email, password) => {
-//     // your existing validation logic
-//     if (email && password) {
-//       localStorage.setItem("isLoggedIn", "true");
-//       setIsLoggedIn(true);
-//       return true;
-//     }
-//     return false;
-//   };
-
-//   const logout = () => {
-//     localStorage.removeItem("isLoggedIn");
-//     setIsLoggedIn(false);
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// export const useAuth = () => useContext(AuthContext);

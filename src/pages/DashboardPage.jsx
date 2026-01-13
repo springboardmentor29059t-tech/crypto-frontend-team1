@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 /* 🔹 Asset → CoinGecko ID mapping */
 const COIN_ID_MAP = {
@@ -31,7 +39,6 @@ export default function DashboardPage() {
   /* 🔹 Fetch logged-in user */
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     fetch("http://localhost:8080/api/user/me", {
       headers: { Authorization: "Bearer " + token },
     })
@@ -40,19 +47,17 @@ export default function DashboardPage() {
       .catch(() => {});
   }, []);
 
-  /* 🔹 Fetch holdings + live prices */
+  /* 🔹 Fetch holdings + prices */
   useEffect(() => {
     const loadDashboard = async () => {
-      try {
-        const data = await fetchPortfolioHoldings();
-        setHoldings(data);
+      const data = await fetchPortfolioHoldings();
+      setHoldings(data);
 
-        const symbols = data.map((h) => h.asset);
-        const priceData = await fetchPrices(symbols);
-        setPrices(priceData);
-      } finally {
-        setLoading(false);
-      }
+      const symbols = data.map((h) => h.asset);
+      const priceData = await fetchPrices(symbols);
+      setPrices(priceData);
+
+      setLoading(false);
     };
 
     loadDashboard();
@@ -63,6 +68,8 @@ export default function DashboardPage() {
   let totalPL = 0;
   let bestAsset = null;
   let bestAssetPct = -Infinity;
+
+  const chartData = [];
 
   holdings.forEach((h) => {
     const qty = Number(h.quantity || 0);
@@ -83,6 +90,11 @@ export default function DashboardPage() {
       bestAssetPct = pct;
       bestAsset = h.asset;
     }
+
+    chartData.push({
+      asset: h.asset,
+      pnl,
+    });
   });
 
   const totalInvested = totalValue - totalPL;
@@ -102,12 +114,9 @@ export default function DashboardPage() {
 
         <div
           onClick={() => navigate("/settings")}
-          className="
-            w-12 h-12 flex items-center justify-center
-            bg-gradient-to-tr from-purple-500 to-pink-500
-            rounded-full cursor-pointer
-            text-xl font-bold shadow-lg
-          "
+          className="w-12 h-12 flex items-center justify-center
+                     bg-gradient-to-tr from-purple-500 to-pink-500
+                     rounded-full cursor-pointer text-xl font-bold"
         >
           {user ? user.name.charAt(0).toUpperCase() : "?"}
         </div>
@@ -117,9 +126,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white/5 p-6 rounded-2xl">
           <p className="text-xs text-gray-400">Portfolio Value</p>
-          <p className="text-3xl font-bold mt-3">
-            {formatINR(totalValue)}
-          </p>
+          <p className="text-3xl font-bold mt-3">{formatINR(totalValue)}</p>
         </div>
 
         <div className="bg-white/5 p-6 rounded-2xl">
@@ -143,62 +150,35 @@ export default function DashboardPage() {
 
         <div className="bg-white/5 p-6 rounded-2xl">
           <p className="text-xs text-gray-400">Best Performer</p>
-          <p className="text-2xl font-bold mt-3">
-            {bestAsset || "--"}
-          </p>
+          <p className="text-2xl font-bold mt-3">{bestAsset || "--"}</p>
           <p className="text-green-400">
             {bestAsset ? `+${bestAssetPct.toFixed(1)}%` : "--"}
           </p>
         </div>
       </div>
 
-      {/* 🔹 Milestone-4 Starter: P&L Overview */}
+      {/* 🔹 Milestone 4: P/L Chart */}
       <div className="mt-10 bg-white/5 p-6 rounded-2xl">
         <h2 className="text-xl font-semibold mb-4">
-          P&L Overview (Unrealized)
+          Unrealized Profit / Loss by Asset
         </h2>
 
-        <div className="space-y-3">
-          {holdings.slice(0, 3).map((h) => {
-            const qty = h.quantity;
-            const avg = h.avgBuyPrice;
-            const price =
-              prices[COIN_ID_MAP[h.asset]]?.inr || 0;
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <XAxis dataKey="asset" />
+            <YAxis />
+            <Tooltip formatter={(v) => formatINR(v)} />
+            <Bar dataKey="pnl" fill="#a855f7" />
+          </BarChart>
+        </ResponsiveContainer>
 
-            const invested = qty * avg;
-            const current = qty * price;
-            const pnl = current - invested;
-
-            return (
-              <div
-                key={h.asset}
-                className="flex justify-between items-center
-                           bg-black/20 rounded-lg px-4 py-3"
-              >
-                <span className="font-medium">{h.asset}</span>
-
-                <span
-                  className={
-                    pnl >= 0 ? "text-green-400" : "text-red-400"
-                  }
-                >
-                  {pnl >= 0 ? "+" : "-"}
-                  {formatINR(Math.abs(pnl))}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="text-xs text-gray-400 mt-4">
-          * Unrealized P/L based on latest CoinGecko prices
+        <p className="text-xs text-gray-400 mt-3">
+          * Based on latest CoinGecko prices (unrealized P/L)
         </p>
       </div>
 
       {loading && (
-        <p className="text-gray-400 mt-6">
-          Loading dashboard data...
-        </p>
+        <p className="text-gray-400 mt-6">Loading dashboard...</p>
       )}
     </div>
   );

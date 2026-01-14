@@ -5,10 +5,15 @@ import {
   Cell,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 import { fetchPortfolioHoldings } from "../api/portfolioApi";
 import { fetchPrices } from "../api/priceApi";
+import { fetchPriceHistory } from "../api/pricingApi";
 import Card from "../components/Card";
 
 const COLORS = ["#a855f7", "#22c55e", "#f97316", "#38bdf8"];
@@ -18,6 +23,10 @@ export default function AnalyticsPage() {
   const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
   const [showPnL, setShowPnL] = useState(false);
+
+  // 🔹 NEW
+  const [selectedAsset, setSelectedAsset] = useState("BTC");
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     fetchPortfolioHoldings()
@@ -31,7 +40,7 @@ export default function AnalyticsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 🔹 Asset → CoinGecko ID
+  // 🔹 Asset → CoinGecko ID (UNCHANGED)
   const getPriceId = (asset) => {
     switch (asset) {
       case "BTC":
@@ -42,16 +51,30 @@ export default function AnalyticsPage() {
         return "solana";
       case "ADA":
         return "cardano";
+      case "BNB":
+        return "binancecoin";
       default:
         return null;
     }
   };
 
-  // 🔹 Chart data (SAFE + FILTERED)
-  const chartData = holdings
-  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
-  .map((h) => {
+  // 🔹 NEW: Fetch price history
+  useEffect(() => {
+  if (!selectedAsset) {
+    setHistory([]);
+    return;
+  }
 
+  fetchPriceHistory(selectedAsset)   // ✅ BTC / ETH
+    .then(setHistory)
+    .catch(() => setHistory([]));
+}, [selectedAsset]);
+
+
+  // 🔹 Chart data (UNCHANGED)
+  const chartData = holdings
+    .filter((h) => Number(h.quantity) > 0)
+    .map((h) => {
       const id = getPriceId(h.asset);
       const rawPrice = prices?.[id]?.inr;
       const price = typeof rawPrice === "number" ? rawPrice : 0;
@@ -70,34 +93,77 @@ export default function AnalyticsPage() {
       ? chartData.reduce((a, b) => (b.value > a.value ? b : a))
       : null;
 
-  // 🔹 Profit & Loss calculations
- const totalInvested = holdings
-  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
-  .reduce((sum, h) => {
-    const qty = Number(h.quantity || 0);
-    const avg = Number(h.avgBuyPrice || 0);
-    return sum + qty * avg;
-  }, 0);
+  // 🔹 Profit & Loss calculations (UNCHANGED)
+  const totalInvested = holdings
+    .filter((h) => Number(h.quantity) > 0)
+    .reduce((sum, h) => {
+      const qty = Number(h.quantity || 0);
+      const avg = Number(h.avgBuyPrice || 0);
+      return sum + qty * avg;
+    }, 0);
 
   const currentValue = holdings
-  .filter(h => Number(h.quantity) > 0)   // ⭐ SELL FIX
-  .reduce((sum, h) => {
-    const id = getPriceId(h.asset);
-    const price = typeof prices?.[id]?.inr === "number"
-      ? prices[id].inr
-      : 0;
+    .filter((h) => Number(h.quantity) > 0)
+    .reduce((sum, h) => {
+      const id = getPriceId(h.asset);
+      const price =
+        typeof prices?.[id]?.inr === "number" ? prices[id].inr : 0;
 
-    return sum + Number(h.quantity) * price;
-  }, 0);
-
+      return sum + Number(h.quantity) * price;
+    }, 0);
 
   const netPnl = currentValue - totalInvested;
   const pnlPct =
     totalInvested === 0 ? 0 : (netPnl / totalInvested) * 100;
 
+  // 🔹 NEW: Export CSV
+  const exportCSV = () => {
+    if (!holdings.length) return;
+
+    const rows = holdings.map((h) => {
+      const id = getPriceId(h.asset);
+      const price = prices?.[id]?.inr || 0;
+
+      return {
+        Asset: h.asset,
+        Quantity: h.quantity,
+        AvgBuyPrice: h.avgBuyPrice,
+        CurrentPrice: price,
+        Invested: h.quantity * h.avgBuyPrice,
+        CurrentValue: h.quantity * price,
+        PnL: h.quantity * price - h.quantity * h.avgBuyPrice,
+      };
+    });
+
+    const headers = Object.keys(rows[0]).join(",");
+    const data = rows.map((r) => Object.values(r).join(","));
+    const csv = [headers, ...data].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "portfolio_analytics.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <h1 className="text-3xl font-bold mb-6">Analytics</h1>
+
+      {/* 🔹 Export CSV Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={exportCSV}
+          className="bg-emerald-600 hover:bg-emerald-700
+                     px-5 py-2 rounded-lg font-semibold"
+        >
+          Export CSV
+        </button>
+      </div>
 
       {/* 🔹 Overview Cards */}
       <div className="grid grid-cols-3 gap-6 mb-6">
@@ -172,9 +238,8 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* 🔹 Chart + Breakdown */}
+      {/* 🔹 Pie Chart + Breakdown */}
       <div className="grid grid-cols-2 gap-6">
-        {/* Pie Chart */}
         <Card>
           <h2 className="text-lg font-semibold mb-4">
             Asset Distribution
@@ -211,7 +276,6 @@ export default function AnalyticsPage() {
           )}
         </Card>
 
-        {/* Breakdown Table */}
         <Card>
           <h2 className="text-lg font-semibold mb-4">
             Asset Breakdown
@@ -250,6 +314,63 @@ export default function AnalyticsPage() {
               })}
             </tbody>
           </table>
+        </Card>
+      </div>
+
+      {/* 🔹 NEW: Line Chart */}
+      <div className="mt-10">
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">
+            Price Trend
+          </h2>
+<select
+  value={selectedAsset}
+  onChange={(e) => setSelectedAsset(e.target.value)}
+  className="
+    mb-4
+    px-4 py-2
+    rounded-lg
+    bg-purple-600
+    text-white
+    font-semibold
+    cursor-pointer
+    focus:outline-none
+    focus:ring-2 focus:ring-purple-400
+    appearance-none
+  "
+>
+
+            {chartData.map((d) => (
+              <option key={d.name} value={d.name}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+
+          {history.length === 0 ? (
+            <p className="text-gray-400">No historical data</p>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={history}>
+                  <XAxis
+                    dataKey="capturedAt"
+                    tickFormatter={(v) =>
+                      new Date(v).toLocaleDateString()
+                    }
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    dataKey="priceInr"
+                    stroke="#a855f7"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </Card>
       </div>
     </>

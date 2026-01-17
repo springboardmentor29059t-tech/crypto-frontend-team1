@@ -1,6 +1,7 @@
 import React from 'react';
+import NotificationBell from './NotificationBell';
 
-export default function Layout({ children, activePage, setActivePage, handleLogout }) {
+export default function Layout({ children, activePage, setActivePage, handleLogout ,userId}) {
   
   // Helper to make buttons look cleaner
   const NavItem = ({ name, label, icon }) => (
@@ -45,10 +46,16 @@ export default function Layout({ children, activePage, setActivePage, handleLogo
           </nav>
         </div>
 
+
+        
+
         {/* Logout Button */}
+        
         <div className="p-6">
+
           <button 
             onClick={handleLogout}
+
             className="w-full flex items-center px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"
           >
             <span className="mr-3"></span> Logout
@@ -65,8 +72,10 @@ export default function Layout({ children, activePage, setActivePage, handleLogo
           
           {/* Profile Icon */}
           <div className="flex items-center space-x-4">
+            <NotificationBell userId={userId} />
              <div className="text-right hidden md:block">
                 <p className="text-sm font-bold text-white">User</p>
+                
                 
              </div>
              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border border-slate-700 cursor-pointer hover:opacity-90">

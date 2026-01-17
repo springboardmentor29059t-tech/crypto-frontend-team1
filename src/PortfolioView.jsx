@@ -1,45 +1,61 @@
 import React, { useEffect, useState } from 'react';
+import PortfolioChart from './PortfolioChart';
 
 export default function PortfolioView({ userId, setActivePage }) {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalValue, setTotalValue] = useState(0);
+  const [marketData, setMarketData] = useState({}); // Stores live prices
 
-  // 1. Fetch data from Database on load
   useEffect(() => {
-    fetchPortfolio();
+    fetchData();
   }, [userId]);
 
-  const fetchPortfolio = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/portfolio/${userId}`);
-      const data = await res.json();
-      setHoldings(data);
-      calculateTotal(data);
+      // 1. Fetch User's Holdings
+      const portfolioRes = await fetch(`http://localhost:8080/api/portfolio/${userId}`);
+      const portfolioData = await portfolioRes.json();
+
+      // 2. Fetch Live Market Prices
+      const marketRes = await fetch('http://localhost:8080/api/markets');
+      const marketList = await marketRes.json();
+
+      // 3. Convert Market List to a Map for easy lookup (Symbol -> Price)
+      // Example: { "btc": 98000.50, "eth": 2750.20 }
+      const priceMap = {};
+      marketList.forEach(coin => {
+        priceMap[coin.symbol.toLowerCase()] = coin.current_price;
+      });
+      setMarketData(priceMap);
+
+      setHoldings(portfolioData);
+      calculateTotal(portfolioData, priceMap);
+
     } catch (err) {
-      console.error("Failed to load portfolio", err);
+      console.error("Failed to load data", err);
     }
   };
 
-  // 2. Sync with Binance (The Magic Button)
   const handleRefresh = async () => {
     setLoading(true);
     try {
       await fetch(`http://localhost:8080/api/portfolio/refresh/${userId}`, { method: 'POST' });
-      await fetchPortfolio(); // Reload data after refresh
+      await fetchData(); // Reload everything
     } catch (err) {
-      alert("Sync failed. Did you link an exchange?");
+      alert("Sync failed. Check backend.");
     }
     setLoading(false);
   };
 
-  // Simple estimation (We will get REAL live prices in Milestone 3)
-  const calculateTotal = (data) => {
+  // REAL CALCULATION LOGIC
+  const calculateTotal = (holdingsData, prices) => {
     let total = 0;
-    data.forEach(coin => {
-      // Temporary static prices for demo
-      const price = coin.assetSymbol === 'BTC' ? 95000 : coin.assetSymbol === 'ETH' ? 2800 : 1; 
-      total += (coin.quantity * price);
+    holdingsData.forEach(h => {
+      // Find price using the symbol (e.g., "btc")
+      // If price not found, default to 0 to prevent crash
+      const livePrice = prices[h.assetSymbol.toLowerCase()] || 0;
+      total += (h.quantity * livePrice);
     });
     setTotalValue(total);
   };
@@ -50,7 +66,7 @@ export default function PortfolioView({ userId, setActivePage }) {
       <div className="bg-gradient-to-r from-blue-600 to-blue-900 rounded-2xl p-8 shadow-lg text-white flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-blue-100 opacity-90">Your financial overview is ready.</p>
+          <p className="text-blue-100 opacity-90">Real-time valuation active.</p>
         </div>
         <button 
           onClick={handleRefresh}
@@ -76,6 +92,19 @@ export default function PortfolioView({ userId, setActivePage }) {
         </div>
       </div>
 
+      {/* STATS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         {/* ... (existing boxes) ... */}
+      </div>
+
+      {/* --- NEW CHART SECTION --- */}
+      {/* We pass "bitcoin" to show the trend of the market leader */}
+      <PortfolioChart assetId="bitcoin" />
+      {/* ------------------------- */}
+
+      {/* ASSETS TABLE */}
+      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden"></div>
+
       {/* ASSETS TABLE */}
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div className="p-6 border-b border-slate-700">
@@ -92,21 +121,28 @@ export default function PortfolioView({ userId, setActivePage }) {
               <tr>
                 <th className="px-6 py-4">Asset</th>
                 <th className="px-6 py-4">Balance</th>
-                <th className="px-6 py-4">Source</th>
+                <th className="px-6 py-4">Live Price</th>
+                <th className="px-6 py-4">Value (USD)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700 text-gray-300">
-              {holdings.map((h) => (
-                <tr key={h.id} className="hover:bg-slate-700/50">
-                  <td className="px-6 py-4 font-bold text-white">{h.assetSymbol}</td>
-                  <td className="px-6 py-4">{h.quantity}</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs border border-blue-500/20">
-                      {h.exchange?.name || 'Exchange'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {holdings.map((h) => {
+                const livePrice = marketData[h.assetSymbol.toLowerCase()] || 0;
+                const value = h.quantity * livePrice;
+
+                return (
+                  <tr key={h.id} className="hover:bg-slate-700/50">
+                    <td className="px-6 py-4 font-bold text-white">{h.assetSymbol}</td>
+                    <td className="px-6 py-4">{h.quantity}</td>
+                    <td className="px-6 py-4 text-slate-400">
+                      ${livePrice.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 font-medium text-green-400">
+                      ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

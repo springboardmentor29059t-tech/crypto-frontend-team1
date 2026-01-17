@@ -41,6 +41,7 @@ export default function Layout({ children, activePage, setActivePage, handleLogo
             {/* NEW ITEMS */}
             <NavItem name="Transactions" label="Transactions" icon="📝" />
             <NavItem name="Exchanges" label="Exchanges" icon="🔗" />
+            <NavItem name="Reports" label="P&L Reports" icon="📊" />
             <NavItem name="Risk Analysis" label="Risk Analysis" icon="⚠️" />
             <NavItem name="Settings" label="Settings" icon="⚙️" />
           </nav>

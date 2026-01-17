@@ -9,6 +9,7 @@ import TransactionsView from './TransactionsView';
 import RiskAnalysisView from './RiskAnalysisView';
 import NotificationBell from './NotificationBell';
 import ExchangesView from './ExchangesView';
+import ReportsView from './ReportsView';
 
 function App() {
   const [userId, setUserId] = useState(null);
@@ -65,6 +66,9 @@ function App() {
 
       {/* 6. Exchanges Module */}
       {activePage === 'Exchanges' && <ExchangesView userId={userId} />}
+
+      {/* 7. Reports Module */}
+      {activePage === 'Reports' && <ReportsView userId={userId} />}
 
       
 

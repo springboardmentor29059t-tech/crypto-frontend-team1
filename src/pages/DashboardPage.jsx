@@ -135,6 +135,7 @@ export default function DashboardPage() {
             {formatINR(totalInvested)}
           </p>
         </div>
+        
 
         <div className="bg-white/5 p-6 rounded-2xl">
           <p className="text-xs text-gray-400">Overall P / L</p>
@@ -156,6 +157,37 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
+{/* 🔑 API Key Actions */}
+<div className="flex justify-center gap-6 mt-10 mb-12">
+
+  <button
+    onClick={() => navigate("/keys")}
+    className="
+      px-6 py-3 rounded-xl
+      bg-white/10 hover:bg-white/20
+      border border-white/20
+      text-sm font-semibold
+      transition
+    "
+  >
+    View API Keys
+  </button>
+
+  <button
+    onClick={() => navigate("/add-key")}
+    className="
+      px-6 py-3 rounded-xl
+      bg-gradient-to-r from-purple-600 to-indigo-600
+      hover:opacity-90
+      text-sm font-semibold
+      shadow-lg
+      transition
+    "
+  >
+    Add API Key
+  </button>
+
+</div>
 
       {/* 🔹 Milestone 4: P/L Chart */}
       <div className="mt-10 bg-white/5 p-6 rounded-2xl">

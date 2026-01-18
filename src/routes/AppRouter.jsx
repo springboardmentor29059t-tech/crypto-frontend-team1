@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import LoginPage from "../pages/Auth/LoginPage";
 import SignupPage from "../pages/Auth/SignupPage";
+import LandingPage from "../pages/LandingPage"; // ⭐ NEW
 
 import ProtectedLayout from "../components/ProtectedLayout";
 
@@ -16,7 +17,6 @@ import AlertsPage from "../pages/AlertsPage";
 import LearningHubPage from "../pages/LearningHubPage";
 import SettingsPage from "../pages/SettingsPage";
 
-// ⭐ NEW IMPORTS — API Key pages
 import AddApiKeyPage from "../pages/AddApiKeyPage";
 import ApiKeysListPage from "../pages/ApiKeysListPage";
 import RiskAlertsPage from "../pages/RiskAlertPage";
@@ -26,13 +26,15 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
 
-        {/* Public Routes */}
+        {/* ⭐ Public Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Public Auth Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/markets" element={<MarketsPage />} />
@@ -43,15 +45,14 @@ export default function AppRouter() {
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/learning" element={<LearningHubPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/risk-alerts" element={<RiskAlertsPage/>} />
+          <Route path="/risk-alerts" element={<RiskAlertsPage />} />
 
-          {/* ⭐ NEW API KEY ROUTES */}
           <Route path="/add-key" element={<AddApiKeyPage />} />
           <Route path="/keys" element={<ApiKeysListPage />} />
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

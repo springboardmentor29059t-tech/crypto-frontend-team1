@@ -21,12 +21,10 @@ const COLORS = ["#a855f7", "#22c55e", "#f97316", "#38bdf8"];
 export default function AnalyticsPage() {
   const [holdings, setHoldings] = useState([]);
   const [prices, setPrices] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [history, setHistory] = useState([]);
   const [showPnL, setShowPnL] = useState(false);
-
 
   /* ================= Fetch Portfolio & Prices ================= */
   useEffect(() => {
@@ -36,8 +34,7 @@ export default function AnalyticsPage() {
         const symbols = data.map((h) => h.asset);
         const priceData = await fetchPrices(symbols);
         setPrices(priceData);
-      })
-      .finally(() => setLoading(false));
+      });
   }, []);
 
   /* ================= Asset → CoinGecko ID ================= */
@@ -87,9 +84,7 @@ export default function AnalyticsPage() {
   }, 0);
 
   const netPnl = currentValue - totalInvested;
-  const pnlPct = totalInvested
-    ? (netPnl / totalInvested) * 100
-    : 0;
+  const pnlPct = totalInvested ? (netPnl / totalInvested) * 100 : 0;
 
   const topAsset =
     chartData.length > 0
@@ -153,52 +148,44 @@ export default function AnalyticsPage() {
           <p className="text-2xl font-bold">{topAsset}</p>
         </Card>
       </div>
+
       {/* 🔹 Check Profit & Loss Button */}
-<div className="flex justify-center my-8">
-  <button
-    onClick={() => setShowPnL(!showPnL)}
-    className="
-      bg-purple-600 hover:bg-purple-700
-      px-8 py-2 rounded-lg
-      font-semibold transition
-    "
-  >
-    {showPnL ? "Hide Profit & Loss" : "Check Profit & Loss"}
-  </button>
-</div>
+      <div className="flex justify-center my-8">
+        <button
+          onClick={() => setShowPnL(!showPnL)}
+          className="bg-purple-600 hover:bg-purple-700 px-8 py-2 rounded-lg font-semibold transition"
+        >
+          {showPnL ? "Hide Profit & Loss" : "Check Profit & Loss"}
+        </button>
+      </div>
 
-{/* 🔹 Profit & Loss Section */}
-{showPnL && (
-  <div className="grid grid-cols-3 gap-6 mb-10">
-    <Card>
-      <p className="text-gray-400 text-sm">Total Invested</p>
-      <p className="text-2xl font-bold">
-        ₹{totalInvested.toFixed(2)}
-      </p>
-    </Card>
+      {/* 🔹 Profit & Loss Section */}
+      {showPnL && (
+        <div className="grid grid-cols-3 gap-6 mb-10">
+          <Card>
+            <p className="text-gray-400 text-sm">Total Invested</p>
+            <p className="text-2xl font-bold">₹{totalInvested.toFixed(2)}</p>
+          </Card>
 
-    <Card>
-      <p className="text-gray-400 text-sm">Current Value</p>
-      <p className="text-2xl font-bold">
-        ₹{currentValue.toFixed(2)}
-      </p>
-    </Card>
+          <Card>
+            <p className="text-gray-400 text-sm">Current Value</p>
+            <p className="text-2xl font-bold">₹{currentValue.toFixed(2)}</p>
+          </Card>
 
-    <Card>
-      <p className="text-gray-400 text-sm">Net Profit / Loss</p>
-      <p
-        className={
-          "text-2xl font-bold " +
-          (netPnl >= 0 ? "text-emerald-400" : "text-red-400")
-        }
-      >
-        {netPnl >= 0 ? "+" : ""}
-        ₹{netPnl.toFixed(2)} ({pnlPct.toFixed(2)}%)
-      </p>
-    </Card>
-  </div>
-)}
-
+          <Card>
+            <p className="text-gray-400 text-sm">Net Profit / Loss</p>
+            <p
+              className={
+                "text-2xl font-bold " +
+                (netPnl >= 0 ? "text-emerald-400" : "text-red-400")
+              }
+            >
+              {netPnl >= 0 ? "+" : ""}
+              ₹{netPnl.toFixed(2)} ({pnlPct.toFixed(2)}%)
+            </p>
+          </Card>
+        </div>
+      )}
 
       {/* Pie + Breakdown */}
       <div className="grid grid-cols-2 gap-6">
@@ -271,50 +258,46 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ================= Milestone 4 – Reports & Tax Readiness ================= */}
-<div className="mt-16 space-y-8">
+      <div className="mt-16 space-y-8">
+        <div className="grid grid-cols-3 gap-6">
+          <Card>
+            <h3 className="font-semibold mb-2">P&L Insights</h3>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              Your portfolio is currently{" "}
+              <span className={netPnl >= 0 ? "text-emerald-400" : "text-red-400"}>
+                {netPnl >= 0 ? "in profit" : "in loss"}
+              </span>
+              . The net unrealized change is ₹{netPnl.toFixed(2)} (
+              {pnlPct.toFixed(2)}%).
+            </p>
+          </Card>
 
-  {/* Insights Row */}
-  <div className="grid grid-cols-3 gap-6">
-    <Card>
-      <h3 className="font-semibold mb-2">P&L Insights</h3>
-      <p className="text-sm text-gray-300 leading-relaxed">
-        Your portfolio is currently{" "}
-        <span className={netPnl >= 0 ? "text-emerald-400" : "text-red-400"}>
-          {netPnl >= 0 ? "in profit" : "in loss"}
-        </span>
-        . The net unrealized change is ₹{netPnl.toFixed(2)} (
-        {pnlPct.toFixed(2)}%).
-      </p>
-    </Card>
+          <Card>
+            <h3 className="font-semibold mb-2">Tax Hints</h3>
+            <ul className="text-sm text-gray-300 space-y-2">
+              <li>• Unrealized gains are not taxable</li>
+              <li>• Tax applies only after SELL transactions</li>
+              <li>• CSV export can be used for tax filing</li>
+            </ul>
+          </Card>
 
-    <Card>
-      <h3 className="font-semibold mb-2">Tax Hints</h3>
-      <ul className="text-sm text-gray-300 space-y-2">
-        <li>• Unrealized gains are not taxable</li>
-        <li>• Tax applies only after SELL transactions</li>
-        <li>• CSV export can be used for tax filing</li>
-      </ul>
-    </Card>
+          <Card>
+            <h3 className="font-semibold mb-2">Report Readiness</h3>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              Portfolio analytics, P&L summaries, historical pricing and
+              exportable CSV reports are ready for auditing and reporting.
+            </p>
+          </Card>
+        </div>
 
-    <Card>
-      <h3 className="font-semibold mb-2">Report Readiness</h3>
-      <p className="text-sm text-gray-300 leading-relaxed">
-        Portfolio analytics, P&L summaries, historical pricing and
-        exportable CSV reports are ready for auditing and reporting.
-      </p>
-    </Card>
-  </div>
-
-  {/* Footer Note */}
-  <Card>
-    <p className="text-xs text-gray-400 text-center">
-      * All calculations are based on latest market prices and user
-      transaction history. This dashboard is designed for analysis and
-      reporting purposes.
-    </p>
-  </Card>
-</div>
-
+        <Card>
+          <p className="text-xs text-gray-400 text-center">
+            * All calculations are based on latest market prices and user
+            transaction history. This dashboard is designed for analysis and
+            reporting purposes.
+          </p>
+        </Card>
+      </div>
     </>
   );
 }

@@ -5,8 +5,8 @@ export default function SettingsPage() {
   
 
   const [profile, setProfile] = useState({
-    name: "Sneha",
-    email: "sneha@gmail.com",
+    name: " ",
+    email: " ",
   });
 
   const [passwords, setPasswords] = useState({

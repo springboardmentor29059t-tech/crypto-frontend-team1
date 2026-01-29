@@ -9,39 +9,31 @@ export default function ProtectedLayout() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       navigate("/login");
       return;
     }
 
-    fetch("http://localhost:8080/api/user/me", {
-      headers: { Authorization: "Bearer " + token }
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then((data) => {
-        setUser(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        navigate("/login");
+    // ✅ MOCK USER (NO BACKEND)
+    setTimeout(() => {
+      setUser({
+        name: "Demo User",
+        email: "demo@example.com",
       });
+      setLoading(false);
+    }, 500); // fake delay for realism
 
-  }, [navigate]); // FIXED WARNING
+  }, [navigate]);
 
   if (loading) {
-    return (
-      <div className="text-white p-10">Loading dashboard...</div>
-    );
+    return <div className="text-white p-10">Loading dashboard...</div>;
   }
 
   return (
     <div className="flex min-h-screen bg-[#0b021f] text-white">
-      <Sidebar userName={user?.name} />
-      <div className="flex-1 overflow-y-auto p-6 text-white">
+      <Sidebar userName={user.name} />
+      <div className="flex-1 overflow-y-auto p-6">
         <Outlet />
       </div>
     </div>

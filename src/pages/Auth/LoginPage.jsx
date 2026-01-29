@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AuthLayout from "../../components/AuthLayout";
 import { useNavigate } from "react-router-dom";
+console.log("🔥 MOCK LOGIN PAGE LOADED");
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,38 +14,40 @@ export default function LoginPage() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  // ✅ MOCK LOGIN (NO BACKEND)
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+    // simulate API delay
+    setTimeout(() => {
+      // mock credentials
+      if (
+        form.email === "test@gmail.com" &&
+        form.password === "123456"
+      ) {
+        // fake JWT token
+        const fakeToken = "mock-jwt-token-123";
 
-      if (!response.ok) throw new Error("Invalid email or password");
+        localStorage.setItem("token", fakeToken);
 
-      const data = await response.json();
+        console.log("Mock login success");
+        navigate("/dashboard");
+      } else {
+        setError("Invalid email or password");
+      }
 
-      localStorage.setItem("token", data.token);
-
-      console.log("Redirecting to dashboard...");
-      navigate("/dashboard");
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
       setLoading(false);
-    }
+    }, 1000);
   };
 
   return (
-    <AuthLayout title="Welcome Back" subtitle="Access your secure crypto dashboard">
+    <AuthLayout
+      title="Welcome Back"
+      subtitle="Access your secure crypto dashboard"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
-
         {/* email */}
         <div>
           <label className="text-gray-300 text-sm">Email</label>
@@ -56,8 +59,8 @@ export default function LoginPage() {
             value={form.email}
             onChange={handleChange}
             className="w-full mt-1 px-4 py-3 rounded-xl bg-white/10 
-                border border-white/20 text-white placeholder-gray-400 
-                focus:ring-2 focus:ring-purple-500 outline-none"
+              border border-white/20 text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-purple-500 outline-none"
           />
         </div>
 
@@ -72,8 +75,8 @@ export default function LoginPage() {
             value={form.password}
             onChange={handleChange}
             className="w-full mt-1 px-4 py-3 pr-12 rounded-xl bg-white/10 
-                border border-white/20 text-white placeholder-gray-400 
-                focus:ring-2 focus:ring-purple-500 outline-none"
+              border border-white/20 text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-purple-500 outline-none"
           />
 
           <span
@@ -85,32 +88,33 @@ export default function LoginPage() {
         </div>
 
         {/* error */}
-        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        {error && (
+          <p className="text-red-400 text-sm text-center">{error}</p>
+        )}
 
         {/* submit */}
         <button
           type="submit"
           disabled={loading}
           className="w-full py-3 mt-2 rounded-xl font-semibold text-white text-lg
-              bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-400
-              shadow-[0_0_20px_rgba(124,58,237,0.6)]
-              hover:scale-[1.02] active:scale-[0.98] transition-all 
-              disabled:opacity-50 disabled:cursor-not-allowed"
+            bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-400
+            shadow-[0_0_20px_rgba(124,58,237,0.6)]
+            hover:scale-[1.02] active:scale-[0.98] transition-all 
+            disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
         {/* signup link */}
-<p className="text-gray-300 text-center mt-4">
-  Don’t have an account?{" "}
-  <span
-    onClick={() => navigate("/signup")}
-    className="text-purple-400 cursor-pointer hover:underline"
-  >
-    Create one
-  </span>
-</p>
-
-
+        <p className="text-gray-300 text-center mt-4">
+          Don’t have an account?{" "}
+          <span
+            onClick={() => navigate("/signup")}
+            className="text-purple-400 cursor-pointer hover:underline"
+          >
+            Create one
+          </span>
+        </p>
       </form>
     </AuthLayout>
   );

@@ -10,6 +10,7 @@ import RiskAnalysisView from './RiskAnalysisView';
 import NotificationBell from './NotificationBell';
 import ExchangesView from './ExchangesView';
 import ReportsView from './ReportsView';
+import HelpView from './HelpView';
 
 function App() {
   const [userId, setUserId] = useState(null);
@@ -69,6 +70,9 @@ function App() {
 
       {/* 7. Reports Module */}
       {activePage === 'Reports' && <ReportsView userId={userId} />}
+
+      {/* 8. Help & Support Module */}
+      {activePage === 'Help' && <HelpView />}
 
       
 
